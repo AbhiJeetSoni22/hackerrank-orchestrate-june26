@@ -1,24 +1,26 @@
 """
-Gemini 2.5 Flash client for perception-only claims analysis.
+Gemini 2.5 Flash client — perception only.
 
-Single call per claim. Returns GeminiPerception JSON.
-Handles retries, rate limiting, and response parsing.
+One call per claim. Returns a validated GeminiPerception instance.
+Handles retries, rate-limit backoff, and JSON parsing.
+No business logic.
 """
 
 from __future__ import annotations
 
 import json
-import time
 import logging
+import time
 from typing import Any
 
 import google.generativeai as genai
+from google.generativeai.types import GenerationConfig
 
 from config import (
     GEMINI_API_KEY,
-    GEMINI_MODEL,
     GEMINI_MAX_OUTPUT_TOKENS,
     GEMINI_MAX_RETRIES,
+    GEMINI_MODEL,
     GEMINI_RETRY_BASE_BACKOFF,
     INTER_CALL_SLEEP_SECONDS,
 )
@@ -27,86 +29,61 @@ from services.image_loader import EncodedImage
 
 logger = logging.getLogger(__name__)
 
+# ── Retryable HTTP status substrings ─────────────────────────────────────────
+_RETRYABLE = ("429", "500", "502", "503", "504", "quota", "rate limit", "resource exhausted")
 
-# ── Client init ───────────────────────────────────────────────────────────────
 
-def _get_model() -> genai.GenerativeModel:
-    """Configure and return a Gemini GenerativeModel instance."""
+def _configure() -> None:
+    """Configure the Gemini SDK. Raises if key is absent."""
     if not GEMINI_API_KEY:
         raise EnvironmentError(
-            "GEMINI_API_KEY is not set. Export it before running."
+            "GEMINI_API_KEY is not set. "
+            "Export it or add it to .env before running."
         )
     genai.configure(api_key=GEMINI_API_KEY)
-    return genai.GenerativeModel(
-        model_name=GEMINI_MODEL,
-        generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-            max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
-            temperature=0.0,  # deterministic
-        ),
-    )
 
 
-# ── Image part builder ────────────────────────────────────────────────────────
+def _is_retryable(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    return any(token in msg for token in _RETRYABLE)
 
-def _build_image_parts(images: list[EncodedImage]) -> list[dict[str, Any]]:
+
+def _image_parts(images: list[EncodedImage]) -> list[dict[str, Any]]:
+    """Convert EncodedImage list to Gemini inline_data parts."""
+    return [
+        {"inline_data": {"mime_type": img.mime_type, "data": img.b64_data}}
+        for img in images
+    ]
+
+
+def _parse(raw: str) -> GeminiPerception:
     """
-    Convert EncodedImage objects into Gemini inline_data parts.
-
-    Uses the SDK's inline_data format so large base64 strings go
-    into structured parts, not into the text prompt body.
-    """
-    parts = []
-    for img in images:
-        parts.append({
-            "inline_data": {
-                "mime_type": img.mime_type,
-                "data": img.b64_data,
-            }
-        })
-    return parts
-
-
-# ── Response parsing ──────────────────────────────────────────────────────────
-
-def _parse_response(raw_text: str) -> GeminiPerception:
-    """
-    Parse Gemini's JSON response into a GeminiPerception model.
-
-    Strips markdown fences if the model wraps output despite mime_type setting.
+    Strip optional markdown fences and parse JSON into GeminiPerception.
 
     Raises:
-        ValueError: If JSON is invalid or schema validation fails.
+        ValueError: on invalid JSON or schema mismatch.
     """
-    text = raw_text.strip()
+    text = raw.strip()
     if text.startswith("```"):
         lines = text.splitlines()
-        # Strip opening fence (```json or ```) and closing ```
         text = "\n".join(
-            line for line in lines
-            if not line.strip().startswith("```")
+            ln for ln in lines if not ln.strip().startswith("```")
         ).strip()
 
     try:
         data = json.loads(text)
     except json.JSONDecodeError as exc:
-        raise ValueError(f"Gemini returned invalid JSON: {exc}\nRaw: {raw_text[:500]}") from exc
+        raise ValueError(
+            f"Gemini returned invalid JSON: {exc}\nRaw (first 500 chars): {raw[:500]}"
+        ) from exc
 
     try:
         return GeminiPerception.model_validate(data)
     except Exception as exc:
-        raise ValueError(f"GeminiPerception schema validation failed: {exc}") from exc
+        raise ValueError(f"GeminiPerception validation failed: {exc}") from exc
 
 
-# ── Retry logic ───────────────────────────────────────────────────────────────
-
-def _is_retryable(exc: Exception) -> bool:
-    """Return True for transient errors worth retrying (429, 5xx)."""
-    msg = str(exc).lower()
-    return any(code in msg for code in ("429", "500", "502", "503", "504", "quota", "rate"))
-
-
-# ── Public API ────────────────────────────────────────────────────────────────
+# ── Public entry point ────────────────────────────────────────────────────────
 
 def call_gemini(
     system_prompt: str,
@@ -114,111 +91,41 @@ def call_gemini(
     images: list[EncodedImage],
 ) -> GeminiPerception:
     """
-    Make a single Gemini 2.5 Flash call for one claim.
+    Make one Gemini 2.5 Flash call for a single claim.
 
-    Sends system prompt, user prompt, and all images as inline_data parts.
-    Parses and validates the JSON response into GeminiPerception.
+    Sends system_instruction + user text + inline image parts.
+    Parses the JSON response into a validated GeminiPerception.
 
     Args:
-        system_prompt: Perception instructions and JSON schema definition.
+        system_prompt: Static perception instructions and JSON schema.
         user_prompt:   Claim-specific context (conversation, image IDs, history).
-        images:        Encoded images for this claim.
+        images:        Encoded images for this claim, in submission order.
 
     Returns:
         Validated GeminiPerception instance.
 
     Raises:
-        RuntimeError: If all retries are exhausted.
-        ValueError:   If the response cannot be parsed or validated.
+        EnvironmentError: GEMINI_API_KEY not set.
+        ValueError:       Response cannot be parsed or validated.
+        RuntimeError:     All retry attempts exhausted.
     """
-    model = _get_model()
-
-    # Build content parts: text prompt + image inline_data parts
-    image_parts = _build_image_parts(images)
-
-    # Gemini SDK content format: list of parts
-    contents = [
-        {"role": "user", "parts": [
-            {"text": user_prompt},
-            *image_parts,
-        ]}
-    ]
-
-    last_exc: Exception | None = None
-
-    for attempt in range(1, GEMINI_MAX_RETRIES + 1):
-        try:
-            response = model.generate_content(
-                contents=contents,
-                # Pass system prompt via system_instruction
-            )
-            raw = response.text
-            perception = _parse_response(raw)
-            # Throttle before returning so caller loop stays within RPM
-            time.sleep(INTER_CALL_SLEEP_SECONDS)
-            return perception
-
-        except (ValueError,) as exc:
-            # Non-retryable: bad JSON or schema mismatch
-            raise
-
-        except Exception as exc:
-            last_exc = exc
-            if not _is_retryable(exc):
-                raise
-
-            backoff = GEMINI_RETRY_BASE_BACKOFF * (2 ** (attempt - 1))
-            logger.warning(
-                "Gemini call failed (attempt %d/%d): %s. Retrying in %.1fs",
-                attempt, GEMINI_MAX_RETRIES, exc, backoff,
-            )
-            time.sleep(backoff)
-
-    raise RuntimeError(
-        f"Gemini call failed after {GEMINI_MAX_RETRIES} attempts: {last_exc}"
-    )
-
-
-def call_gemini_with_system(
-    system_prompt: str,
-    user_prompt: str,
-    images: list[EncodedImage],
-) -> GeminiPerception:
-    """
-    Variant that passes system_instruction via model kwargs for Gemini 2.5 Flash.
-
-    Gemini 2.5 Flash supports system_instruction at model init time.
-    Re-initialises the model per call to inject the system prompt.
-
-    Args:
-        system_prompt: Perception instructions and JSON schema.
-        user_prompt:   Claim-specific context.
-        images:        Encoded images for this claim.
-
-    Returns:
-        Validated GeminiPerception instance.
-    """
-    if not GEMINI_API_KEY:
-        raise EnvironmentError("GEMINI_API_KEY is not set.")
-
-    genai.configure(api_key=GEMINI_API_KEY)
+    _configure()
 
     model = genai.GenerativeModel(
         model_name=GEMINI_MODEL,
         system_instruction=system_prompt,
-        generation_config=genai.GenerationConfig(
+        generation_config=GenerationConfig(
             response_mime_type="application/json",
             max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
             temperature=0.0,
         ),
     )
 
-    image_parts = _build_image_parts(images)
     contents = [
-        {"role": "user", "parts": [
-            {"text": user_prompt},
-            *image_parts,
-        ]}
+        {
+            "role": "user",
+            "parts": [{"text": user_prompt}, *_image_parts(images)],
+        }
     ]
 
     last_exc: Exception | None = None
@@ -226,12 +133,12 @@ def call_gemini_with_system(
     for attempt in range(1, GEMINI_MAX_RETRIES + 1):
         try:
             response = model.generate_content(contents=contents)
-            raw = response.text
-            perception = _parse_response(raw)
+            result = _parse(response.text)
             time.sleep(INTER_CALL_SLEEP_SECONDS)
-            return perception
+            return result
 
         except ValueError:
+            # Non-retryable: bad JSON or schema mismatch — raise immediately.
             raise
 
         except Exception as exc:
@@ -241,11 +148,15 @@ def call_gemini_with_system(
 
             backoff = GEMINI_RETRY_BASE_BACKOFF * (2 ** (attempt - 1))
             logger.warning(
-                "Gemini call failed (attempt %d/%d): %s. Retrying in %.1fs",
-                attempt, GEMINI_MAX_RETRIES, exc, backoff,
+                "Gemini attempt %d/%d failed (%s). Retrying in %.1fs.",
+                attempt,
+                GEMINI_MAX_RETRIES,
+                exc,
+                backoff,
             )
             time.sleep(backoff)
 
     raise RuntimeError(
-        f"Gemini call failed after {GEMINI_MAX_RETRIES} attempts: {last_exc}"
+        f"Gemini call failed after {GEMINI_MAX_RETRIES} attempts. "
+        f"Last error: {last_exc}"
     )
