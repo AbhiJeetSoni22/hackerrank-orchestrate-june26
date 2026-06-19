@@ -1,161 +1,338 @@
-# HackerRank Orchestrate
+# HackerRank Orchestrate — Multi-Modal Evidence Review
 
-Starter repository for the **HackerRank Orchestrate** 24-hour hackathon.
+A production-ready system that verifies damage claims using submitted images, claim conversations, user history, and evidence requirements.
 
-Build a system that verifies visual evidence for damage claims across three object types: **cars**, **laptops**, and **packages**.
-
-Your system will receive claim conversations, one or more submitted images, user claim history, and minimum evidence requirements. It must decide whether the submitted images support the claim, contradict it, or do not provide enough information.
-
-Read [`problem_statement.md`](./problem_statement.md) for the full task spec, input/output schema, and allowed values.
+**Supported object types:** `car`, `laptop`, `package`
 
 ---
 
-## Contents
+## Table of Contents
 
-1. [Repository layout](#repository-layout)
-2. [What you need to build](#what-you-need-to-build)
-3. [Where your code goes](#where-your-code-goes)
-4. [Quickstart](#quickstart)
-5. [Evaluation](#evaluation)
-6. [Chat transcript logging](#chat-transcript-logging)
-7. [Submission](#submission)
-8. [Judge interview](#judge-interview)
+* [Problem Statement](#problem-statement)
+* [Architecture](#architecture)
+* [Repository Structure](#repository-structure)
+* [Setup](#setup)
+* [Running the Pipeline](#running-the-pipeline)
+* [Running Evaluation](#running-evaluation)
+* [Output Schema](#output-schema)
+* [Design Decisions](#design-decisions)
+* [Known Limitations](#known-limitations)
 
 ---
 
-## Repository layout
+## Problem Statement
+
+For each claim in `dataset/claims.csv`, the system:
+
+1. Extracts the actual damage claim from a customer conversation
+2. Inspects submitted images using a vision model
+3. Determines whether evidence requirements are met
+4. Identifies visible damage type and affected object part
+5. Classifies the claim as:
+
+   * `supported`
+   * `contradicted`
+   * `not_enough_information`
+6. Detects image quality and fraud-related risks
+7. Estimates damage severity
+8. Produces a final `output.csv`
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+
+    A[claims.csv] --> B[CSV Loader]
+    H[user_history.csv] --> B
+    I[evidence_requirements.csv] --> B
+
+    B --> C[Pydantic Models]
+
+    C --> D[Image Loader]
+    D --> E[Prompt Builder]
+
+    E --> F[Gemini 2.5 Flash]
+
+    F --> G[Gemini Perception]
+
+    G --> J[Risk Aggregator]
+    G --> K[Rule Engine]
+
+    J --> K
+
+    K --> L[Output Writer]
+    L --> M[output.csv]
+```
+
+### Key Design Decisions
+
+* Gemini performs **perception only**
+* Python rule engine performs **all business decisions**
+* One Gemini API call per claim
+* Deterministic outputs using:
+
+  * `temperature=0.0`
+  * JSON responses
+  * Rule-based post-processing
+
+---
+
+## Repository Structure
 
 ```text
 .
-├── AGENTS.md                         # Rules for AI coding tools + transcript logging
-├── problem_statement.md              # Full task description and I/O schema
-├── README.md                         # You are here
-├── code/                             # Build your solution here
-│   ├── main.py                       # Suggested terminal entry point
+├── AGENTS.md
+├── problem_statement.md
+├── README.md
+├── STATUS.md
+├── output.csv
+├── .env.example
+├── requirements.txt
+│
+├── code/
+│   ├── main.py
+│   ├── models.py
+│   ├── config.py
+│   │
+│   ├── services/
+│   │   ├── csv_loader.py
+│   │   ├── image_loader.py
+│   │   ├── prompt_builder.py
+│   │   ├── gemini_client.py
+│   │   ├── risk_aggregator.py
+│   │   ├── rule_engine.py
+│   │   └── output_writer.py
+│   │
 │   └── evaluation/
-│       └── main.py                   # Suggested evaluation entry point
+│       ├── main.py
+│       ├── metrics.py
+│       └── evaluation_report.md
+│
 └── dataset/
-    ├── sample_claims.csv             # Inputs + expected outputs for development
-    ├── claims.csv                    # Inputs only; run your system on these rows
-    ├── user_history.csv              # Historical claim counts and risk context
-    ├── evidence_requirements.csv     # Minimum image evidence requirements
+    ├── sample_claims.csv
+    ├── claims.csv
+    ├── user_history.csv
+    ├── evidence_requirements.csv
+    │
     └── images/
-        ├── sample/                   # Images referenced by sample_claims.csv
-        └── test/                     # Images referenced by claims.csv
+        ├── sample/
+        └── test/
 ```
 
 ---
 
-## What you need to build
+## Setup
 
-A system that, for each row in `dataset/claims.csv`, produces one row in `output.csv`.
+### Prerequisites
 
-Input fields:
+* Python 3.11+
+* Gemini API Key
 
-| Column | Meaning |
-|---|---|
-| `user_id` | User submitting the claim; use this to look up `dataset/user_history.csv` |
-| `image_paths` | One or more submitted image paths, separated by semicolons |
-| `user_claim` | Chat transcript describing the issue |
-| `claim_object` | `car`, `laptop`, or `package` |
-
-Required output fields:
-
-| Column | Meaning |
-|---|---|
-| `evidence_standard_met` | Whether the image set is sufficient to evaluate the claim |
-| `evidence_standard_met_reason` | Short reason for the evidence decision |
-| `risk_flags` | Semicolon-separated risk flags, or `none` |
-| `issue_type` | Visible issue type |
-| `object_part` | Relevant object part |
-| `claim_status` | `supported`, `contradicted`, or `not_enough_information` |
-| `claim_status_justification` | Concise explanation grounded in the image evidence |
-| `supporting_image_ids` | Image IDs supporting the decision, or `none` |
-| `valid_image` | Whether the image set is usable for automated review |
-| `severity` | `none`, `low`, `medium`, `high`, or `unknown` |
-
-Hard requirements:
-
-- Must read the provided CSV files and local images.
-- Must produce `output.csv` with the exact schema in `problem_statement.md`.
-- Must include an evaluation workflow
-- Must avoid hardcoded test labels or file-specific answers.
-
-Beyond that you are free to bring your own approach: VLMs, LLMs, structured prompting, rule layers, batching, caching, evaluation pipelines, model comparison, or anything else.
-
----
-
-## Where your code goes
-
-All of your work belongs in [`code/`](./code/). The repo ships with empty starter files that you can grow into your full solution.
-
-Suggested conventions:
-
-- Put your main runnable solution in `code/main.py`, or document your own entry point clearly.
-- Put evaluation code under `code/evaluation/` or an `evaluation/` folder included in your final `code.zip`.
-- Write final predictions to `output.csv`.
-
----
-
-## Quickstart
-
-Clone this repository:
+### Installation
 
 ```bash
 git clone git@github.com:interviewstreet/hackerrank-orchestrate-june26.git
+
 cd hackerrank-orchestrate-june26
+
+python -m venv .venv
+
+source .venv/Scripts/activate
+
+pip install -r requirements.txt
 ```
 
-You are free to use any language or runtime. Python, JavaScript, and TypeScript are all reasonable choices.
+### Environment Variables
+
+Create `.env`:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+**Important:** Never commit `.env` files.
 
 ---
 
-## Evaluation
+## Running the Pipeline
 
-The evaluation report should include:
+```bash
+python code/main.py
+```
 
-- metrics on `dataset/sample_claims.csv`
-- at least two strategies, prompts, or model configurations compared
-- the final strategy used for `output.csv`
-- operational analysis covering model calls, token usage, image usage, approximate cost, runtime, and TPM/RPM considerations
+The pipeline:
 
----
+1. Loads claims
+2. Loads images
+3. Calls Gemini
+4. Runs deterministic rule engine
+5. Generates `output.csv`
 
-## Chat transcript logging
+Example logs:
 
-This repo ships with an `AGENTS.md` that modern AI coding tools may read. It instructs the tool to append conversation turns to a shared log file:
+```text
+=== Evidence Review Pipeline Starting ===
 
-| Platform | Path |
-|---|---|
-| macOS / Linux | `$HOME/hackerrank_orchestrate/log.txt` |
-| Windows | `%USERPROFILE%\hackerrank_orchestrate\log.txt` |
+Loaded 46 claim(s)
 
-You will upload this log as your chat transcript at submission time. The chat transcript means your conversation with the AI coding tool you used to build the system. It is not the runtime logs, reasoning trace, or conversation history produced by the claim-verification agent you are building.
+[1/46] Processing claim user_002 ...
 
-If you use multiple AI tools, include the relevant conversation logs from all of them in the same transcript file. Separate each tool's section with a clear divider and label it with the tool name.
+...
 
-Never paste secrets into the chat. If secrets are needed, use environment variables.
+=== Pipeline Complete ===
 
----
-
-## Submission
-
-Submit the following files as instructed by HackerRank:
-
-1. **Code zip**: zip your runnable solution, README, prompts/configs, and evaluation folder. Exclude virtualenvs, `node_modules`, build artifacts, and unnecessary generated files.
-2. **Predictions CSV**: your final `output.csv` for all rows in `dataset/claims.csv`.
-3. **Chat transcript**: the `log.txt` from the path in [Chat transcript logging](#chat-transcript-logging).
-
-Before submitting, confirm:
-
-- `output.csv` has one row per row in `dataset/claims.csv`.
-- `output.csv` has the exact required columns in the exact required order.
-- Your evaluation files are included in `code.zip`.
+Succeeded: 46
+Failed: 0
+```
 
 ---
 
-## Judge interview
+## Running Evaluation
 
-After submission, the AI Judge may ask about your approach, implementation decisions, model usage, evaluation strategy, and how you used AI while building the solution.
+```bash
+python code/evaluation/main.py
+```
 
-Be prepared to explain your solution in detail.
+Outputs:
+
+* Field-level accuracy
+* Strategy comparison
+* Prediction export
+
+Generated file:
+
+```text
+code/evaluation/sample_predictions.csv
+```
+
+---
+
+## Output Schema
+
+| Column                       | Description             |
+| ---------------------------- | ----------------------- |
+| user_id                      | User identifier         |
+| image_paths                  | Submitted image paths   |
+| user_claim                   | Original customer claim |
+| claim_object                 | car / laptop / package  |
+| evidence_standard_met        | Boolean                 |
+| evidence_standard_met_reason | Explanation             |
+| risk_flags                   | Detected risks          |
+| issue_type                   | Damage category         |
+| object_part                  | Damaged component       |
+| claim_status                 | Final decision          |
+| claim_status_justification   | Supporting explanation  |
+| supporting_image_ids         | Evidence images         |
+| valid_image                  | Boolean                 |
+| severity                     | Damage severity         |
+
+### Allowed Claim Status
+
+* `supported`
+* `contradicted`
+* `not_enough_information`
+
+### Allowed Severity
+
+* `none`
+* `low`
+* `medium`
+* `high`
+* `unknown`
+
+---
+
+## Design Decisions
+
+### Separation of Perception and Decisions
+
+Gemini identifies:
+
+* Visible damage
+* Image quality
+* Potential prompt injection
+
+The rule engine determines:
+
+* Claim status
+* Severity
+* Evidence sufficiency
+* Risk aggregation
+
+This keeps the system:
+
+* Auditable
+* Reproducible
+* Deterministic
+
+---
+
+### Single Gemini Call Per Claim
+
+All images are submitted together using inline image parts.
+
+Benefits:
+
+* Lower latency
+* Lower cost
+* Simpler orchestration
+
+---
+
+### Prompt Injection Resistance
+
+The vision model only reports detected instructions.
+
+The rule engine ignores any instruction-like content entirely.
+
+---
+
+### Deterministic Output
+
+Implemented through:
+
+* `temperature=0.0`
+* Structured JSON output
+* Fixed rule evaluation
+* Canonical flag ordering
+
+---
+
+## Known Limitations
+
+### Severity Dependence
+
+Severity quality depends on Gemini's visible damage detection accuracy.
+
+### Multilingual Conversations
+
+Spanish and Hindi conversations rely on Gemini multilingual understanding.
+
+### No Result Caching
+
+All claims are processed on every run.
+
+Future optimization:
+
+* Image hashing
+* Response caching
+
+### Single Production Strategy
+
+No prompt ensembles or fallback prompts are currently implemented.
+
+### SDK Migration
+
+Current implementation uses:
+
+```text
+google-generativeai
+```
+
+Future migration target:
+
+```text
+google.genai
+```
