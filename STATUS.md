@@ -1,36 +1,17 @@
-# Project Status
+# STATUS.md
 
-## Completed Modules
+## Project Status
 
-| Module | File | Notes |
-|---|---|---|
-| Domain models | `code/models.py` | Pydantic v2; enums, Claim, UserHistory, EvidenceRequirement, GeminiPerception, ClaimResult |
-| Config | `code/config.py` | Paths, model name, rate-limit constants, output column order |
-| CSV loader | `code/services/csv_loader.py` | load_claims, load_user_history, load_evidence_requirements, helpers |
-| Image loader | `code/services/image_loader.py` | base64 encode, mime detection, missing-file warning |
-| Gemini client | `code/services/gemini_client.py` | Single call per claim, retry/backoff, JSON parse, GeminiPerception validation |
-| Prompt builder | `code/services/prompt_builder.py` | Static system prompt + dynamic user prompt; allowed values inline |
+**Project:** Multi-Modal Evidence Review Agent
+**Hackathon:** HackerRank Orchestrate
+**Current Phase:** Phase 5 Preparation
+**Architecture Status:** Frozen ✅
 
-## Pending Modules
-
-| Module | File | Priority |
-|---|---|---|
-| Rule engine | `code/services/rule_engine.py` | **Next — Phase 3** |
-| Risk aggregator | `code/services/risk_aggregator.py` | Phase 3 |
-| Output writer | `code/services/output_writer.py` | Phase 4 |
-| Main pipeline | `code/main.py` | Phase 4 |
-| Evaluation runner | `code/evaluation/main.py` | Phase 5 |
-| Metrics | `code/evaluation/metrics.py` | Phase 5 |
-| Evaluation report | `code/evaluation/evaluation_report.md` | Phase 5 |
-| Code README | `code/README.md` | Phase 5 |
-
+---
 ## Technical Notes:
 - Current implementation uses google-generativeai SDK.
 - SDK is deprecated but remains functional.
 - Migration to google.genai SDK can be done after hackathon if needed.
-
-
----
 
 # Architecture Summary
 
@@ -52,6 +33,7 @@ claims.csv
         │
         ▼
   prompt_builder
+ (system prompt + user prompt)
         │
         ▼
   gemini_client
@@ -82,34 +64,59 @@ risk_aggregator   rule_engine
 
 # Key Design Decisions
 
-* Gemini performs perception only.
-* Business decisions are deterministic and handled by Python.
-* Single Gemini call per claim.
-* Images are sent using inline image parts.
+* Gemini performs perception only:
+
+  * claim extraction
+  * visible damage detection
+  * object part detection
+  * image quality assessment
+  * supporting image identification
+  * prompt injection detection
+
+* Rule Engine performs all business decisions:
+
+  * valid_image
+  * evidence_standard_met
+  * claim_status
+  * severity
+  * issue_type
+  * object_part
+
+* One Gemini call per claim.
+
+* Images sent as inline image parts.
+
 * JSON-only responses enforced.
-* Temperature set to `0.0` for deterministic outputs.
-* Retry and exponential backoff implemented.
-* Prompt injection detection handled in perception layer.
-* Risk aggregation handled separately from claim decisions.
-* Architecture intentionally avoids LangChain, databases, queues, and unnecessary frameworks.
+
+* `temperature=0.0` for deterministic outputs.
+
+* Exponential backoff for transient API failures.
+
+* Failed claims are logged and skipped without stopping the pipeline.
+
+* Output uses `csv.QUOTE_ALL` for maximum compatibility.
+
+* No LangChain, database, queues, or unnecessary frameworks.
 
 ---
 
 # Completed Modules
 
-| File                             | Status | Purpose                                |
-| -------------------------------- | ------ | -------------------------------------- |
-| code/models.py                   | ✅      | Pydantic models and enums              |
-| code/config.py                   | ✅      | Constants, paths, model configuration  |
-| code/services/csv_loader.py      | ✅      | CSV loading and parsing                |
-| code/services/image_loader.py    | ✅      | Image encoding and metadata extraction |
-| code/services/gemini_client.py   | ✅      | Gemini API integration                 |
-| code/services/prompt_builder.py  | ✅      | Prompt generation                      |
-| code/services/risk_aggregator.py | ✅      | Risk flag aggregation                  |
-| code/services/rule_engine.py     | ✅      | Deterministic business rules           |
-| requirements.txt                 | ✅      | Project dependencies                   |
-| .env.example                     | ✅      | Environment template                   |
-| .gitignore                       | ✅      | Git exclusions                         |
+| File                             | Status | Purpose                                    |
+| -------------------------------- | ------ | ------------------------------------------ |
+| code/models.py                   | ✅      | Pydantic models and enums                  |
+| code/config.py                   | ✅      | Configuration, constants, output schema    |
+| code/services/csv_loader.py      | ✅      | CSV loading and parsing                    |
+| code/services/image_loader.py    | ✅      | Image encoding and metadata extraction     |
+| code/services/gemini_client.py   | ✅      | Gemini API integration and JSON validation |
+| code/services/prompt_builder.py  | ✅      | Prompt generation                          |
+| code/services/risk_aggregator.py | ✅      | Risk flag aggregation                      |
+| code/services/rule_engine.py     | ✅      | Deterministic decision engine              |
+| code/services/output_writer.py   | ✅      | Output CSV generation                      |
+| code/main.py                     | ✅      | End-to-end processing pipeline             |
+| requirements.txt                 | ✅      | Project dependencies                       |
+| .env.example                     | ✅      | Environment variable template              |
+| .gitignore                       | ✅      | Git exclusions                             |
 
 ---
 
@@ -117,112 +124,126 @@ risk_aggregator   rule_engine
 
 | File                                 | Priority | Purpose                       |
 | ------------------------------------ | -------- | ----------------------------- |
-| code/services/output_writer.py       | High     | Generate output.csv           |
-| code/main.py                         | High     | Main processing pipeline      |
-| code/evaluation/main.py              | Medium   | Evaluation workflow           |
-| code/evaluation/metrics.py           | Medium   | Metrics calculation           |
+| code/evaluation/main.py              | High     | Evaluation workflow           |
+| code/evaluation/metrics.py           | High     | Metrics calculation           |
 | code/evaluation/evaluation_report.md | Medium   | Evaluation findings           |
 | README.md                            | Medium   | Setup and usage documentation |
 
 ---
 
-# Next Phase (Phase 4)
+# Progress
 
-## output_writer.py
-
-Responsibilities:
-
-* Accept `list[ClaimResult]`
-* Write `output.csv`
-* Preserve exact schema order
-* Convert booleans to lowercase:
-
-  * true
-  * false
-* Use consistent CSV quoting
+| Phase   | Description                          | Status        |
+| ------- | ------------------------------------ | ------------- |
+| Phase 1 | Foundation (Models, Config, Loaders) | ✅ Complete    |
+| Phase 2 | Gemini Integration                   | ✅ Complete    |
+| Phase 3 | Rule Engine & Risk Aggregation       | ✅ Complete    |
+| Phase 4 | Pipeline & Output Generation         | ✅ Complete    |
+| Phase 5 | Evaluation & Documentation           | ⏳ In Progress |
 
 ---
 
-## main.py
+# Next Phase — Evaluation Framework
+
+## metrics.py
 
 Responsibilities:
 
-* Load environment variables
-* Load datasets
-* Load evidence requirements
-* Process claims one-by-one
-* Build prompts
-* Call Gemini
-* Aggregate risks
-* Execute rule engine
-* Collect ClaimResult objects
-* Generate output.csv
-* Log progress and errors
-* Print final summary
-
----
-
-# Evaluation Plan
-
-## Strategy A
-
-Single perception prompt.
-
-## Strategy B
-
-Refined perception prompt with stricter output constraints.
+* Exact-match accuracy calculation
+* Jaccard similarity for risk flags
+* Per-field accuracy reporting
+* Aggregate evaluation summary
 
 Metrics:
 
-* Claim Status Accuracy
-* Evidence Standard Accuracy
-* Severity Accuracy
-* Valid Image Accuracy
-* Issue Type Accuracy
-* Object Part Accuracy
-* Risk Flag Similarity (Jaccard)
+* claim_status accuracy
+* evidence_standard_met accuracy
+* valid_image accuracy
+* severity accuracy
+* issue_type accuracy
+* object_part accuracy
+* risk_flags Jaccard similarity
 
-Final submission strategy will be selected based on evaluation results.
+---
+
+## evaluation/main.py
+
+Responsibilities:
+
+* Load sample_claims.csv
+* Run Strategy A
+* Run Strategy B
+* Compare metrics
+* Generate evaluation summary
+* Select best-performing strategy
+
+Strategies:
+
+### Strategy A
+
+Current production prompt.
+
+### Strategy B
+
+Refined prompt with stricter output constraints and examples.
+
+---
+
+## evaluation_report.md
+
+Must include:
+
+* Strategy comparison table
+* Winning strategy
+* Rationale
+* Estimated API calls
+* Estimated runtime
+* Token usage estimate
+* Cost estimate
+* Retry/backoff behavior
+* Operational considerations
+
+---
+
+## README.md
+
+Must include:
+
+* Project overview
+* Architecture summary
+* Installation steps
+* Environment setup
+* Running the pipeline
+* Running evaluation
+* Output format
+* Repository structure
 
 ---
 
 # Technical Notes
 
 * Current implementation uses `google-generativeai`.
-* SDK is deprecated but remains functional.
+* SDK is deprecated but fully functional.
 * Migration to `google.genai` can be performed after hackathon completion.
-* Priority is stability and successful submission.
+* Priority is correctness, reproducibility, and submission reliability.
 
 ---
 
-# Current Progress
+# Current Completion Estimate
 
-Phase 1 — Foundation ✅
+Core System: 90% Complete ✅
 
-Phase 2 — Gemini Integration ✅
+Remaining Work:
 
-Phase 3 — Rule Engine & Risk Aggregation ✅
+* Evaluation Framework
+* Metrics
+* Evaluation Report
+* README
+* Final Submission Validation
 
-Phase 4 — Pipeline & Output Generation ⏳
-
-Phase 5 — Evaluation & Documentation ⏳
-
----
-
-# Next Claude Task
-
-Generate:
-
-* code/services/output_writer.py
-* code/main.py
-* Updated STATUS.md
-
-Constraints:
-
-* No command execution
-* No script execution
-* Return file contents only
-* Follow existing architecture
+Estimated Remaining Effort:
+~1 development phase
 
 ```
 ```
+
