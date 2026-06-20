@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_020__images-test-case_020-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "trackpad",
+      "claimed_issue": "crack",
+      "claim_summary": "The customer claims the laptop trackpad is cracked due to their bag being squeezed on a bus.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "trackpad",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a hand on the laptop trackpad, which appears to be in good condition with no visible cracks."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_020",
+    "image_paths": "images/test/case_020/img_1.jpg",
+    "user_claim": "Customer: I travel with this laptop every day, and yesterday was a mess because my bag got squeezed between two seats on the bus. | Support: Did the laptop stop working after that? | Customer: Not immediately. I used it for a while and thought everything was normal. Then during a call I noticed the cursor movement felt strange. I restarted the laptop, cleaned the surface, and even checked if my mouse settings changed. | Support: Are you reporting a software issue or physical damage? | Customer: That is what confused me. At first I thought it was software, then I noticed the lower palm-rest area looked slightly off. | Support: Which part do you want the images reviewed for? | Customer: Not the screen, keyboard, or hinge. The actual claim is that the trackpad is cracked.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed trackpad with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk",
+    "issue_type": "crack",
+    "object_part": "trackpad",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (crack) is not visible. Images show 'none' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "none"
+  }
+}

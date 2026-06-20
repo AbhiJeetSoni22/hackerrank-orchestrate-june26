@@ -4,9 +4,8 @@ Evaluation entry point.
 Runs the full pipeline on sample_claims.csv (which has ground-truth labels),
 compares Strategy A vs Strategy B, prints metrics, and saves results.
 
-Strategy A: Production prompt (build_system_prompt as-is).
-Strategy B: Refined prompt with stricter output constraints and
-            explicit few-shot guidance on edge cases.
+Cache is used per-strategy so each strategy's results are stored separately.
+Set ENABLE_CACHE=false to force re-evaluation without cache.
 
 Usage:
     python code/evaluation/main.py
@@ -23,16 +22,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-# Allow imports from code/ directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config import (
+    CACHE_DIR,
     DATASET_DIR,
+    ENABLE_CACHE,
     EVIDENCE_REQUIREMENTS_CSV,
     SAMPLE_CLAIMS_CSV,
     USER_HISTORY_CSV,
 )
 from models import ClaimResult
+from services.cache_manager import CacheManager, claim_id
 from services.csv_loader import (
     get_applicable_requirements,
     get_user_history,
@@ -61,7 +62,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("evaluation")
 
-# ── Ground-truth columns present in sample_claims.csv ────────────────────────
 _GT_FIELDS = [
     "evidence_standard_met",
     "evidence_standard_met_reason",
@@ -75,26 +75,16 @@ _GT_FIELDS = [
     "severity",
 ]
 
-# ── Strategy B: refined system prompt ────────────────────────────────────────
 
 def build_strategy_b_prompt() -> str:
-    """
-    Strategy B: production prompt + stricter instructions + edge-case guidance.
-
-    Adds:
-    - Explicit instruction to prefer "not_enough_information" when part
-      visibility is ambiguous rather than guessing.
-    - Reminder that wrong_object overrides all other signals.
-    - Stricter null handling: visible_issue must be null, not omitted.
-    """
     base = build_system_prompt()
     addendum = """
 
 ADDITIONAL CONSTRAINTS (Strategy B):
 - If you cannot clearly confirm the claimed part is visible, set
   shows_claimed_part=false. Do not guess from partial context.
-- If the image shows a completely different object (e.g. a shoe instead of a
-  car), set wrong_object_detected=true and shows_claimed_object=false.
+- If the image shows a completely different object, set
+  wrong_object_detected=true and shows_claimed_object=false.
   This takes priority over all other assessments for that image.
 - visible_issue must always be present: use null if nothing is visible,
   never omit the field.
@@ -106,14 +96,7 @@ ADDITIONAL CONSTRAINTS (Strategy B):
     return base + addendum
 
 
-# ── CSV ground-truth loader ───────────────────────────────────────────────────
-
 def load_ground_truth(path: Path) -> dict[tuple[str, str], dict[str, str]]:
-    """
-    Load ground-truth labels from sample_claims.csv.
-
-    Returns a dict keyed by (user_id, image_paths_raw) → field dict.
-    """
     gt: dict[tuple[str, str], dict[str, str]] = {}
     with path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
@@ -122,10 +105,25 @@ def load_ground_truth(path: Path) -> dict[tuple[str, str], dict[str, str]]:
     return gt
 
 
-# ── Single claim processor ────────────────────────────────────────────────────
+def run_claim_cached(
+    claim,
+    history_lookup,
+    all_requirements,
+    system_prompt: str,
+    cache: CacheManager | None,
+) -> ClaimResult:
+    """Process one claim, using per-strategy cache if available."""
+    image_paths_raw = ";".join(claim.image_paths)
+    cid = claim_id(claim.user_id, image_paths_raw)
 
-def run_claim(claim, history_lookup, all_requirements, system_prompt) -> ClaimResult:
-    """Process one claim through the full pipeline."""
+    if cache is not None and cache.is_completed(cid):
+        cached = cache.load(cid)
+        if cached is not None:
+            _perception, result = cached
+            logger.info("  Cache hit")
+            return result
+        logger.info("  Cache corrupt — reprocessing")
+
     user_history = get_user_history(history_lookup, claim.user_id)
     requirements = get_applicable_requirements(all_requirements, claim.claim_object)
     images = load_images(claim.image_paths, dataset_dir=DATASET_DIR)
@@ -140,9 +138,9 @@ def run_claim(claim, history_lookup, all_requirements, system_prompt) -> ClaimRe
     risk_flags = aggregate_risk_flags(perception, user_history)
     engine_result = decide(perception, risk_flags, claim.claim_object)
 
-    return ClaimResult(
+    result = ClaimResult(
         user_id=claim.user_id,
-        image_paths=";".join(claim.image_paths),
+        image_paths=image_paths_raw,
         user_claim=claim.user_claim,
         claim_object=claim.claim_object.value,
         evidence_standard_met=engine_result.evidence_standard_met,
@@ -157,8 +155,11 @@ def run_claim(claim, history_lookup, all_requirements, system_prompt) -> ClaimRe
         severity=engine_result.severity.value,
     )
 
+    if cache is not None:
+        cache.save(cid, perception, result)
 
-# ── Strategy runner ───────────────────────────────────────────────────────────
+    return result
+
 
 def run_strategy(
     strategy_name: str,
@@ -167,51 +168,49 @@ def run_strategy(
     history_lookup: dict,
     all_requirements: list,
     ground_truth: dict,
+    cache: CacheManager | None,
 ) -> tuple[EvaluationSummary, list[ClaimResult]]:
-    """
-    Run all sample claims through the pipeline with a given system prompt.
-
-    Returns evaluation summary and list of ClaimResult objects.
-    """
     logger.info("Running %s on %d claims ...", strategy_name, len(claims))
     records = []
     results = []
     errors = 0
 
     for idx, claim in enumerate(claims, start=1):
-        logger.info("[%d/%d] %s user_id=%s", idx, len(claims), strategy_name, claim.user_id)
+        image_paths_raw = ";".join(claim.image_paths)
+        cid = claim_id(claim.user_id, image_paths_raw)
+        is_cached = cache is not None and cache.is_completed(cid)
+        logger.info(
+            "[%d/%d] %s user_id=%s%s",
+            idx, len(claims), strategy_name, claim.user_id,
+            " [cached]" if is_cached else "",
+        )
         try:
-            result = run_claim(claim, history_lookup, all_requirements, system_prompt)
+            result = run_claim_cached(
+                claim, history_lookup, all_requirements, system_prompt, cache
+            )
             results.append(result)
-
-            key = (claim.user_id, ";".join(claim.image_paths))
+            key = (claim.user_id, image_paths_raw)
             gt = ground_truth.get(key, {})
-
-            predicted = {
-                "evidence_standard_met": str(result.evidence_standard_met).lower(),
-                "risk_flags": result.risk_flags,
-                "issue_type": result.issue_type,
-                "object_part": result.object_part,
-                "claim_status": result.claim_status,
-                "valid_image": str(result.valid_image).lower(),
-                "severity": result.severity,
-            }
             records.append({
                 "user_id": claim.user_id,
-                "predicted": predicted,
+                "predicted": {
+                    "evidence_standard_met": str(result.evidence_standard_met).lower(),
+                    "risk_flags": result.risk_flags,
+                    "issue_type": result.issue_type,
+                    "object_part": result.object_part,
+                    "claim_status": result.claim_status,
+                    "valid_image": str(result.valid_image).lower(),
+                    "severity": result.severity,
+                },
                 "expected": gt,
             })
-
         except Exception as exc:  # noqa: BLE001
             errors += 1
             logger.error("FAILED %s user_id=%s: %s", strategy_name, claim.user_id, exc)
 
     logger.info("%s complete. errors=%d", strategy_name, errors)
-    summary = generate_summary(records, strategy_name)
-    return summary, results
+    return generate_summary(records, strategy_name), results
 
-
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     logger.info("=== Evaluation Pipeline Starting ===")
@@ -221,24 +220,35 @@ def main() -> None:
     all_requirements = load_evidence_requirements(EVIDENCE_REQUIREMENTS_CSV)
     ground_truth = load_ground_truth(SAMPLE_CLAIMS_CSV)
 
-    logger.info("Loaded %d sample claims with ground truth", len(claims))
+    logger.info("Loaded %d sample claims", len(claims))
 
-    prompt_a = build_system_prompt()
-    prompt_b = build_strategy_b_prompt()
+    # Separate cache dirs per strategy to avoid cross-contamination.
+    cache_a: CacheManager | None = None
+    cache_b: CacheManager | None = None
+    if ENABLE_CACHE:
+        cache_a = CacheManager(
+            cache_dir=CACHE_DIR / "eval_strategy_a",
+            checkpoint_file=CACHE_DIR / "eval_strategy_a" / "checkpoint.json",
+        )
+        cache_b = CacheManager(
+            cache_dir=CACHE_DIR / "eval_strategy_b",
+            checkpoint_file=CACHE_DIR / "eval_strategy_b" / "checkpoint.json",
+        )
 
     t0 = time.time()
     summary_a, results_a = run_strategy(
-        "Strategy A", prompt_a, claims, history_lookup, all_requirements, ground_truth
+        "Strategy A", build_system_prompt(),
+        claims, history_lookup, all_requirements, ground_truth, cache_a,
     )
     time_a = time.time() - t0
 
     t0 = time.time()
     summary_b, results_b = run_strategy(
-        "Strategy B", prompt_b, claims, history_lookup, all_requirements, ground_truth
+        "Strategy B", build_strategy_b_prompt(),
+        claims, history_lookup, all_requirements, ground_truth, cache_b,
     )
     time_b = time.time() - t0
 
-    # Print results.
     print_summary(summary_a)
     print_summary(summary_b)
     compare_summaries(summary_a, summary_b)
@@ -246,12 +256,11 @@ def main() -> None:
     logger.info("Strategy A runtime: %.1fs", time_a)
     logger.info("Strategy B runtime: %.1fs", time_b)
 
-    # Save winning strategy results for inspection.
     winner = summary_a if summary_a.mean_accuracy >= summary_b.mean_accuracy else summary_b
     winning_results = results_a if winner.strategy_name == "Strategy A" else results_b
     out_path = Path(__file__).resolve().parent / "sample_predictions.csv"
     write_output(winning_results, path=out_path)
-    logger.info("Winning strategy predictions saved to %s", out_path)
+    logger.info("Winning strategy (%s) predictions saved to %s", winner.strategy_name, out_path)
     logger.info("=== Evaluation Complete ===")
 
 

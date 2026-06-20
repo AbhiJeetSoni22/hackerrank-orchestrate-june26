@@ -1,0 +1,76 @@
+{
+  "claim_id": "user_002__images-test-case_001-img_1.jpg_images-test-case_001-img_2.jpg_images-test-case_001-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "front_bumper",
+      "claimed_issue": "unknown",
+      "claim_summary": "Customer claims damage to the car's front bumper and left headlight.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "body",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Full front view of a white car, no visible damage on the front bumper or headlight from this distance."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "scratch",
+        "visible_part": "front_bumper",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Close-up of the front bumper showing clear scratches."
+      },
+      {
+        "image_id": "img_3",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "headlight",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Close-up of the left headlight, no visible damage is present."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_2"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_002",
+    "image_paths": "images/test/case_001/img_1.jpg;images/test/case_001/img_2.jpg;images/test/case_001/img_3.jpg",
+    "user_claim": "Customer: Morning. I parked near office and later noticed something off in the front. | Agent: Is this about one part or multiple parts? | Customer: Two things, I think. The front bumper looks damaged and the left headlight also looks affected. | Agent: Should we review both as part of this claim? | Customer: Yes, front bumper and left headlight together.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed front_bumper with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "scratch",
+    "object_part": "front_bumper",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed front_bumper with visible unknown. Supporting images: img_2.",
+    "supporting_image_ids": "img_2",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

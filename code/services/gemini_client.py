@@ -73,6 +73,8 @@ def _parse(raw: str) -> GeminiPerception:
     try:
         data = json.loads(text)
     except json.JSONDecodeError as exc:
+        with open("failed_response.json", "w", encoding="utf-8") as f:
+         f.write(text)
         raise ValueError(
             f"Gemini returned invalid JSON: {exc}\nRaw (first 500 chars): {raw[:500]}"
         ) from exc
@@ -81,6 +83,39 @@ def _parse(raw: str) -> GeminiPerception:
         return GeminiPerception.model_validate(data)
     except Exception as exc:
         raise ValueError(f"GeminiPerception validation failed: {exc}") from exc
+
+
+def _repair_parse(
+    model: genai.GenerativeModel,
+    raw: str,
+) -> GeminiPerception:
+    """
+    Ask Gemini to repair a malformed or truncated JSON response.
+
+    This is only used after the first parse attempt fails. The repair prompt
+    is intentionally short so the model can focus on returning a complete,
+    valid JSON object matching the same schema.
+    """
+    repair_prompt = f"""\
+The previous response was invalid or truncated JSON.
+Return a complete valid JSON object only.
+Preserve the same meaning and schema.
+If a field is missing, use null, false, unknown, or an empty list as appropriate.
+Do not add markdown, commentary, or extra keys.
+
+INVALID_JSON:
+{raw}
+"""
+
+    response = model.generate_content(
+        contents=[
+            {
+                "role": "user",
+                "parts": [{"text": repair_prompt}],
+            }
+        ]
+    )
+    return _parse(response.text)
 
 
 # ── Public entry point ────────────────────────────────────────────────────────
@@ -133,14 +168,6 @@ def call_gemini(
     for attempt in range(1, GEMINI_MAX_RETRIES + 1):
         try:
             response = model.generate_content(contents=contents)
-            result = _parse(response.text)
-            time.sleep(INTER_CALL_SLEEP_SECONDS)
-            return result
-
-        except ValueError:
-            # Non-retryable: bad JSON or schema mismatch — raise immediately.
-            raise
-
         except Exception as exc:
             last_exc = exc
             if not _is_retryable(exc):
@@ -155,6 +182,25 @@ def call_gemini(
                 backoff,
             )
             time.sleep(backoff)
+            continue
+
+        try:
+            result = _parse(response.text)
+            time.sleep(INTER_CALL_SLEEP_SECONDS)
+            return result
+        except ValueError as exc:
+            logger.warning("JSON parse failed, attempting JSON repair...")
+
+            try:
+                result = _repair_parse(model, response.text)
+                time.sleep(INTER_CALL_SLEEP_SECONDS)
+                return result
+            except Exception as repair_exc:
+                last_exc = repair_exc
+                logger.warning(
+                    "JSON repair failed (%s). Retrying original request.",
+                    repair_exc,
+                )
 
     raise RuntimeError(
         f"Gemini call failed after {GEMINI_MAX_RETRIES} attempts. "

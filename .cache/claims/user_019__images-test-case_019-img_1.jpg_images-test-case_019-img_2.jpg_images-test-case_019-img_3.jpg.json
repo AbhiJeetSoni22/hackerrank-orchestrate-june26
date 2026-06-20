@@ -1,0 +1,76 @@
+{
+  "claim_id": "user_019__images-test-case_019-img_1.jpg_images-test-case_019-img_2.jpg_images-test-case_019-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "hinge",
+      "claimed_issue": "broken_part",
+      "claim_summary": "The customer claims the laptop hinge is broken and the screen is cracked.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "broken_part",
+        "visible_part": "hinge",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a laptop with a broken hinge and separated casing."
+      },
+      {
+        "image_id": "img_2",
+        "valid": false,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "This is a generic stock image of a Dell laptop, not the specific claimed object."
+      },
+      {
+        "image_id": "img_3",
+        "valid": false,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "lid",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "This is a generic stock image of a Dell laptop, not the specific claimed object."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_019",
+    "image_paths": "images/test/case_019/img_1.jpg;images/test/case_019/img_2.jpg;images/test/case_019/img_3.jpg",
+    "user_claim": "Customer: The laptop fell while open. | Support: What visible issues are you claiming? | Customer: Hinge broke, and I also think the screen cracked. | Support: Both in one claim? | Customer: Yes, hinge damage and screen crack together.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed hinge with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "broken_part",
+    "object_part": "hinge",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed hinge with visible broken_part. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

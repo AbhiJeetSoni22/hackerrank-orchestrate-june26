@@ -1,0 +1,52 @@
+{
+  "claim_id": "user_014__images-test-case_014-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "windshield",
+      "claimed_issue": "crack",
+      "claim_summary": "The customer is claiming a crack on the car's windshield.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "crack",
+        "visible_part": "windshield",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows the interior of a car with a severely cracked windshield, originating from a central impact point."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_014",
+    "image_paths": "images/test/case_014/img_1.jpg",
+    "user_claim": "Customer: This is from after my car came back from service. | Support: What changed? | Customer: I noticed a windshield crack. | Support: Are you asking us to review authenticity or just damage? | Customer: Just the windshield crack claim.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed windshield with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk",
+    "issue_type": "crack",
+    "object_part": "windshield",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed windshield with visible crack. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

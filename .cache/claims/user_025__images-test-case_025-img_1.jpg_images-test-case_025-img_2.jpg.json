@@ -1,0 +1,64 @@
+{
+  "claim_id": "user_025__images-test-case_025-img_1.jpg_images-test-case_025-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "keyboard",
+      "claimed_issue": "missing_part",
+      "claim_summary": "The customer is claiming that keys are missing from their laptop keyboard.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "none",
+        "visible_part": "keyboard",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image shows an external keyboard and mouse, not a laptop. No missing keys are visible on this keyboard."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "missing_part",
+        "visible_part": "keyboard",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a close-up of a keyboard with one keycap visibly missing."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_2"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_025",
+    "image_paths": "images/test/case_025/img_1.jpg;images/test/case_025/img_2.jpg",
+    "user_claim": "Customer: Teclas del laptop faltan despues de una caida. | Support: Are you reporting missing keyboard keys? | Customer: Si, some keycaps came off. | Support: Is the claim about the laptop keyboard specifically? | Customer: Yes, laptop keyboard keys missing.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed keyboard with sufficient clarity to evaluate the claim.",
+    "risk_flags": "wrong_object",
+    "issue_type": "missing_part",
+    "object_part": "keyboard",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed keyboard with visible missing_part. Supporting images: img_2.",
+    "supporting_image_ids": "img_2",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

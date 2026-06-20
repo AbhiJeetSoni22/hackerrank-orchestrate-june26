@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_007__images-test-case_005-img_1.jpg_images-test-case_005-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "side_mirror",
+      "claimed_issue": "missing_part",
+      "claim_summary": "The customer claims their car's side mirror is missing or broken.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "side_mirror",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A full side view of a car is shown, with the driver's side mirror visible and appearing intact."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "none",
+        "visible_part": "unknown",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A close-up of a car wheel and tire is shown; no side mirror is visible."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_007",
+    "image_paths": "images/test/case_005/img_1.jpg;images/test/case_005/img_2.jpg",
+    "user_claim": "Customer: Hi, I am not sure which photo is clearest, but my side mirror is the issue. | Support: What happened to it? | Customer: It seems missing or broken after the car was parked outside. | Support: Should we ignore unrelated car photos if any? | Customer: Please focus on the side mirror claim.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed side_mirror with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "missing_part",
+    "object_part": "side_mirror",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (missing_part) is not visible. Images show 'none' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "none"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "claim_id": "user_004__images-test-case_004-img_1.jpg_images-test-case_004-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "windshield",
+      "claimed_issue": "glass_shatter",
+      "claim_summary": "The customer is claiming the car's windshield is shattered due to a stone impact.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "glass_shatter",
+        "visible_part": "windshield",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows multiple impact points and radiating cracks on a car's windshield."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "windshield",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the interior of a car looking out through the windshield, but no damage is visible on the windshield itself."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_004",
+    "image_paths": "images/test/case_004/img_1.jpg;images/test/case_004/img_2.jpg",
+    "user_claim": "Customer: A stone hit the front glass while driving. | Support: Are you reporting the windshield? | Customer: Yes. It looks shattered from my side. | Support: Any other part involved? | Customer: No, only the windshield shatter claim.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed windshield with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "glass_shatter",
+    "object_part": "windshield",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed windshield with visible glass_shatter. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

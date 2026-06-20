@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_018__images-test-case_018-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "keyboard",
+      "claimed_issue": "water_damage",
+      "claim_summary": "The customer claims the laptop keyboard has possible liquid damage from a coffee spill.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "keyboard",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows the laptop keyboard, which appears clean and free of any visible liquid damage or stains."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_018",
+    "image_paths": "images/test/case_018/img_1.jpg",
+    "user_claim": "Customer: I spilled coffee near the laptop and now I am worried. | Support: Which part should be checked? | Customer: Keyboard liquid damage. | Support: Are keys missing or physically broken? | Customer: No, it is about possible liquid damage on the keyboard.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed keyboard with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "water_damage",
+    "object_part": "keyboard",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (water_damage) is not visible. Images show 'none' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "none"
+  }
+}

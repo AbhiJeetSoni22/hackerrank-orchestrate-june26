@@ -1,0 +1,54 @@
+{
+  "claim_id": "user_008__images-test-case_006-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "hood",
+      "claimed_issue": "dent",
+      "claim_summary": "The customer claims the car's hood has small hail dents.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [
+          "blurry_image"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "dent",
+        "visible_part": "hood",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image is blurry, but multiple dents are visible on the car's hood."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_008",
+    "image_paths": "images/test/case_006/img_1.jpg",
+    "user_claim": "Customer: Hi, I am not sure if I am filing this in the right place, so please bear with me for a minute. | Support: No problem, tell me what happened. | Customer: The weather was bad last night and I had parked outside because the covered parking was full. In the morning I was already late, so I did not inspect the car properly. | Support: When did you first notice a possible issue? | Customer: Later in the day, after a colleague mentioned that my car looked a little different from the front. I walked around it twice and honestly could not decide if I was overthinking it. | Support: Which area should we review? | Customer: I first checked the windshield and the sides, but those are not what I want to claim. | Support: Okay, what is the actual damage claim? | Customer: The hood seems to have small hail dents, so please review the hood for hail damage.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed hood with sufficient clarity to evaluate the claim.",
+    "risk_flags": "blurry_image;user_history_risk",
+    "issue_type": "dent",
+    "object_part": "hood",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed hood with visible dent. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

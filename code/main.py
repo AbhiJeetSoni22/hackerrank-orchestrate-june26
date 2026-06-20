@@ -4,14 +4,18 @@ Main pipeline entry point.
 Reads claims.csv, processes each claim through the full pipeline,
 and writes output.csv.
 
-Pipeline per claim:
+Pipeline per claim (cache miss):
   Claim → image_loader → prompt_builder → gemini_client
-        → risk_aggregator → rule_engine → ClaimResult
+        → risk_aggregator → rule_engine → ClaimResult → cache → output
+
+Pipeline per claim (cache hit):
+  Claim → cache_manager.load() → ClaimResult → output
 
 Usage:
     python main.py
 
 Requires GEMINI_API_KEY in environment or .env file.
+Set ENABLE_CACHE=false to disable caching.
 """
 
 from __future__ import annotations
@@ -20,18 +24,21 @@ import logging
 import sys
 from pathlib import Path
 
-# Load .env before any config import so env vars are available.
 from dotenv import load_dotenv
 load_dotenv()
 
 from config import (
+    CACHE_DIR,
+    CHECKPOINT_FILE,
     CLAIMS_CSV,
     DATASET_DIR,
+    ENABLE_CACHE,
     EVIDENCE_REQUIREMENTS_CSV,
     OUTPUT_CSV,
     USER_HISTORY_CSV,
 )
 from models import ClaimResult
+from services.cache_manager import CacheManager, claim_id
 from services.csv_loader import (
     get_applicable_requirements,
     get_user_history,
@@ -46,7 +53,7 @@ from services.prompt_builder import build_system_prompt, build_user_prompt
 from services.risk_aggregator import aggregate_risk_flags
 from services.rule_engine import decide
 
-# ── Logging setup ─────────────────────────────────────────────────────────────
+# ── Logging ───────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,29 +71,40 @@ def process_claim(
     history_lookup: dict,
     all_requirements: list,
     system_prompt: str,
+    cache: CacheManager | None,
 ) -> ClaimResult:
     """
-    Run one claim through the full pipeline.
+    Process one claim. Returns cached result if available, otherwise runs
+    the full Gemini + rule engine pipeline and caches the result.
 
     Args:
         claim:             Claim object from csv_loader.
         history_lookup:    Dict of user_id → UserHistory.
         all_requirements:  Full list of EvidenceRequirement objects.
         system_prompt:     Static Gemini system prompt (built once).
+        cache:             CacheManager instance, or None if caching disabled.
 
     Returns:
         ClaimResult ready for output.
-
-    Raises:
-        Any exception from downstream services (caught by caller).
     """
+    image_paths_raw = ";".join(claim.image_paths)
+    cid = claim_id(claim.user_id, image_paths_raw)
+
+    # ── Cache hit ─────────────────────────────────────────────────────────────
+    if cache is not None and cache.is_completed(cid):
+        cached = cache.load(cid)
+        if cached is not None:
+            _perception, result = cached
+            logger.info("  Cache hit — skipping Gemini")
+            return result
+        # Cache corrupt or missing — fall through to re-process.
+        logger.info("  Cache miss (corrupt) — reprocessing")
+
+    # ── Full pipeline ─────────────────────────────────────────────────────────
     user_history = get_user_history(history_lookup, claim.user_id)
     requirements = get_applicable_requirements(all_requirements, claim.claim_object)
-
-    # Load and encode images.
     images = load_images(claim.image_paths, dataset_dir=DATASET_DIR)
 
-    # Build per-claim user prompt.
     user_prompt = build_user_prompt(
         claim_conversation=claim.user_claim,
         claim_object=claim.claim_object,
@@ -95,27 +113,23 @@ def process_claim(
         evidence_requirements=requirements,
     )
 
-    # Single Gemini call — perception only.
     perception = call_gemini(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
         images=images,
     )
 
-    # Aggregate risk flags (perception + history).
     risk_flags = aggregate_risk_flags(perception, user_history)
 
-    # Deterministic business decisions.
     engine_result = decide(
         perception=perception,
         risk_flags=risk_flags,
         claim_object=claim.claim_object,
     )
 
-    # Assemble final output row.
-    return ClaimResult(
+    result = ClaimResult(
         user_id=claim.user_id,
-        image_paths=";".join(claim.image_paths),
+        image_paths=image_paths_raw,
         user_claim=claim.user_claim,
         claim_object=claim.claim_object.value,
         evidence_standard_met=engine_result.evidence_standard_met,
@@ -130,11 +144,24 @@ def process_claim(
         severity=engine_result.severity.value,
     )
 
+    # ── Write cache immediately after success ─────────────────────────────────
+    if cache is not None:
+        cache.save(cid, perception, result)
+
+    return result
+
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     logger.info("=== Evidence Review Pipeline Starting ===")
+    logger.info("Cache enabled: %s", ENABLE_CACHE)
+
+    # ── Cache setup ───────────────────────────────────────────────────────────
+    cache: CacheManager | None = None
+    if ENABLE_CACHE:
+        cache = CacheManager(cache_dir=CACHE_DIR, checkpoint_file=CHECKPOINT_FILE)
+        logger.info("Cache: %s", cache.summary())
 
     # ── Load datasets ─────────────────────────────────────────────────────────
     logger.info("Loading claims from %s", CLAIMS_CSV)
@@ -143,30 +170,33 @@ def main() -> None:
 
     logger.info("Loading user history from %s", USER_HISTORY_CSV)
     history_lookup = load_user_history(USER_HISTORY_CSV)
-    logger.info("Loaded history for %d user(s)", len(history_lookup))
 
     logger.info("Loading evidence requirements from %s", EVIDENCE_REQUIREMENTS_CSV)
     all_requirements = load_evidence_requirements(EVIDENCE_REQUIREMENTS_CSV)
-    logger.info("Loaded %d requirement(s)", len(all_requirements))
 
-    # ── Build system prompt once ──────────────────────────────────────────────
     system_prompt = build_system_prompt()
     logger.info("System prompt built (%d chars)", len(system_prompt))
 
-    # ── Process claims sequentially ───────────────────────────────────────────
+    # ── Process claims ────────────────────────────────────────────────────────
     results: list[ClaimResult] = []
     success_count = 0
+    cache_hit_count = 0
     error_count = 0
     total = len(claims)
 
     for idx, claim in enumerate(claims, start=1):
+        image_paths_raw = ";".join(claim.image_paths)
+        cid = claim_id(claim.user_id, image_paths_raw)
+        is_cached = cache is not None and cache.is_completed(cid)
+
         logger.info(
-            "[%d/%d] Processing claim user_id=%s object=%s images=%d",
+            "[%d/%d] user_id=%s object=%s images=%d%s",
             idx,
             total,
             claim.user_id,
             claim.claim_object.value,
             len(claim.image_paths),
+            " [cached]" if is_cached else "",
         )
 
         try:
@@ -175,9 +205,13 @@ def main() -> None:
                 history_lookup=history_lookup,
                 all_requirements=all_requirements,
                 system_prompt=system_prompt,
+                cache=cache,
             )
             results.append(result)
             success_count += 1
+            if is_cached:
+                cache_hit_count += 1
+
             logger.info(
                 "[%d/%d] Done — status=%s severity=%s flags=%s",
                 idx,
@@ -197,23 +231,27 @@ def main() -> None:
                 exc,
                 exc_info=True,
             )
-            # Continue processing remaining claims.
 
     # ── Write output ──────────────────────────────────────────────────────────
     logger.info("Writing %d result(s) to %s", len(results), OUTPUT_CSV)
     write_output(results, path=OUTPUT_CSV)
 
     # ── Summary ───────────────────────────────────────────────────────────────
+    gemini_calls = success_count - cache_hit_count
     logger.info("=== Pipeline Complete ===")
-    logger.info("Total claims : %d", total)
-    logger.info("Succeeded    : %d", success_count)
-    logger.info("Failed       : %d", error_count)
-    logger.info("Output file  : %s", OUTPUT_CSV)
+    logger.info("Total claims    : %d", total)
+    logger.info("Succeeded       : %d", success_count)
+    logger.info("  Cache hits    : %d  (no Gemini call)", cache_hit_count)
+    logger.info("  Gemini calls  : %d", gemini_calls)
+    logger.info("Failed          : %d", error_count)
+    logger.info("Output file     : %s", OUTPUT_CSV)
+
+    if ENABLE_CACHE and cache:
+        logger.info("Cache summary   : %s", cache.summary())
 
     if error_count > 0:
         logger.warning(
-            "%d claim(s) failed and were excluded from output.csv. "
-            "Review logs above for details.",
+            "%d claim(s) failed. Re-run to resume — completed claims will be loaded from cache.",
             error_count,
         )
         sys.exit(1)

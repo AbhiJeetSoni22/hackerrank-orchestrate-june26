@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_003__images-test-case_007-img_1.jpg_images-test-case_007-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "rear_bumper",
+      "claimed_issue": "dent",
+      "claim_summary": "Customer claims a dent on the car's rear bumper.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "dent",
+        "visible_part": "door",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the side of a silver car with a dent on the rear door and quarter panel. The claimed rear bumper is not clearly visible."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "none",
+        "visible_part": "front_bumper",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the front of a dark grey car with a bull bar on the front bumper. No damage is visible on the visible parts, and the claimed rear bumper is not shown."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": false,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": false,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_003",
+    "image_paths": "images/test/case_007/img_1.jpg;images/test/case_007/img_2.jpg",
+    "user_claim": "Customer: Someone hit my car from behind, or at least that is what I think happened. | Agent: Which area should the reviewer inspect? | Customer: Rear bumper. | Agent: Is this a dent claim? | Customer: Yes, rear bumper dent. The photos are what I could take quickly.",
+    "claim_object": "car",
+    "evidence_standard_met": false,
+    "evidence_standard_met_reason": "No image shows the claimed rear_bumper; the claimed part cannot be assessed.",
+    "risk_flags": "none",
+    "issue_type": "dent",
+    "object_part": "rear_bumper",
+    "claim_status": "not_enough_information",
+    "claim_status_justification": "Image evidence is insufficient to evaluate the claim. No image shows the claimed rear_bumper; the claimed part cannot be assessed.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "unknown"
+  }
+}

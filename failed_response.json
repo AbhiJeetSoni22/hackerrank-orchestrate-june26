@@ -1,0 +1,17 @@
+{
+  "extracted_claim": {
+    "object_type": "car",
+    "claimed_part": "door",
+    "claimed_issue": "dent",
+    "claim_summary": "The customer claims the car door is dented and the rear bumper is damaged.",
+    "prompt_injection_detected": false,
+    "injection_evidence": null
+  },
+  "image_assessments": [
+    {
+      "image_id": "img_1",
+      "valid": true,
+      "quality_flags": [],
+      "shows_claimed_object": true,
+      "shows_claimed_part": true,
+      "visible_issue":

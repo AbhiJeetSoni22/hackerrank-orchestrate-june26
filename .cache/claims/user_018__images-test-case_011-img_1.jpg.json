@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_018__images-test-case_011-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "taillight",
+      "claimed_issue": "crack",
+      "claim_summary": "The customer claims the taillight of their car is cracked.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "broken_part",
+        "visible_part": "headlight",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows the front of a blue car with significant damage to the front bumper, hood, and a broken headlight."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": false,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": false,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_018",
+    "image_paths": "images/test/case_011/img_1.jpg",
+    "user_claim": "Customer: The back light of my car cracked. | Agent: By back light, do you mean taillight? | Customer: Yes, taillight. | Agent: Is this about the front headlight? | Customer: No, taillight only.",
+    "claim_object": "car",
+    "evidence_standard_met": false,
+    "evidence_standard_met_reason": "No image shows the claimed taillight; the claimed part cannot be assessed.",
+    "risk_flags": "none",
+    "issue_type": "crack",
+    "object_part": "taillight",
+    "claim_status": "not_enough_information",
+    "claim_status_justification": "Image evidence is insufficient to evaluate the claim. No image shows the claimed taillight; the claimed part cannot be assessed.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "unknown"
+  }
+}
