@@ -144,11 +144,7 @@ supporting_image_ids: include only images where BOTH the claimed part
 AND a visible issue are clearly present.
 
 OUTPUT FORMAT
-Return ONLY a complete valid JSON object.
-
-Never truncate the response.
-Never stop before closing all braces.
-Never output partial keys.. No markdown fences. No preamble. No explanation.
+Return ONLY valid JSON. No markdown fences. No preamble. No explanation.
 Match this schema exactly:
 
 {_SCHEMA}"""

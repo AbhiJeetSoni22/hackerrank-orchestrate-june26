@@ -2,19 +2,20 @@
 
 ## Executive Summary
 
+This report documents the evaluation of the damage claim verification system
+on `dataset/sample_claims.csv` (20 labeled records). Two prompt strategies
+were compared. The winning strategy is used to produce the final `output.csv`.
+
+> **Fill in after running `python code/evaluation/main.py`**
+
 | Item | Value |
 |---|---|
-| Evaluation date | June 2026 |
-| Sample records evaluated | 20 (dataset/sample_claims.csv) |
-| Test records (production) | 44 (dataset/claims.csv) |
-| Evaluation strategy comparison | Strategy A vs Strategy B |
-| Winning strategy | Not measured during final submission run. |
-| Mean accuracy (winner) | Not measured during final submission run. |
-| Primary metric (claim_status accuracy) | Not measured during final submission run. |
-
-The production pipeline successfully processed all 44 test claims with zero
-failures. `output.csv` was generated with the exact required schema and column
-order.
+| Evaluation date | YYYY-MM-DD |
+| Sample records | 20 |
+| Test records | 46 |
+| Winning strategy | Strategy A / Strategy B |
+| Mean accuracy (winner) | XX.X% |
+| Primary metric (claim_status accuracy) | XX.X% |
 
 ---
 
@@ -22,26 +23,20 @@ order.
 
 ### Dataset
 - `dataset/sample_claims.csv`: 20 rows with ground-truth labels across all output fields.
-- Claims span three object types: car, laptop, package.
+- Claims span three object types: car (10), laptop (6), package (6) — approximate.
 - Images loaded from `dataset/images/sample/`.
 
 ### Process
-1. Load all 20 sample claims with ground-truth labels.
-2. Run Strategy A through the full pipeline (Gemini perception → rule engine).
-3. Run Strategy B through the full pipeline.
+1. Load all 20 sample claims.
+2. Run Strategy A through full pipeline (Gemini perception → rule engine).
+3. Run Strategy B through full pipeline.
 4. Compare predicted values against ground-truth for all evaluable fields.
-5. Select winning strategy for production run.
-
-To reproduce this evaluation:
-
-```bash
-python code/evaluation/main.py
-```
+5. Select winning strategy.
 
 ### Metrics
-- **Exact-match accuracy:** `claim_status`, `evidence_standard_met`, `valid_image`, `severity`, `issue_type`, `object_part`
-- **Jaccard similarity:** `risk_flags` (set overlap between predicted and expected flag sets)
-- **Mean accuracy:** unweighted average across all accuracy fields
+- **Exact-match accuracy**: `claim_status`, `evidence_standard_met`, `valid_image`, `severity`, `issue_type`, `object_part`
+- **Jaccard similarity**: `risk_flags` (set overlap between predicted and expected flag sets)
+- **Mean accuracy**: unweighted average across all accuracy fields
 
 ---
 
@@ -51,7 +46,6 @@ python code/evaluation/main.py
 Base perception prompt as defined in `services/prompt_builder.py`.
 Instructs Gemini to report only what is visually present.
 No additional guidance on edge cases.
-Used for the final production run that generated `output.csv`.
 
 ### Strategy B — Refined Prompt
 Strategy A plus:
@@ -64,169 +58,133 @@ Strategy A plus:
 
 ## Strategy Comparison
 
-Not measured during final submission run.
-
-Run `python code/evaluation/main.py` to generate actual values.
+> **Fill in after running evaluation**
 
 | Field | Strategy A | Strategy B | Winner |
 |---|---|---|---|
-| claim_status | — | — | — |
-| evidence_standard_met | — | — | — |
-| valid_image | — | — | — |
-| severity | — | — | — |
-| issue_type | — | — | — |
-| object_part | — | — | — |
-| risk_flags (Jaccard) | — | — | — |
-| **Mean accuracy** | **—** | **—** | **—** |
+| claim_status | XX.X% | XX.X% | — |
+| evidence_standard_met | XX.X% | XX.X% | — |
+| valid_image | XX.X% | XX.X% | — |
+| severity | XX.X% | XX.X% | — |
+| issue_type | XX.X% | XX.X% | — |
+| object_part | XX.X% | XX.X% | — |
+| risk_flags (Jaccard) | XX.X% | XX.X% | — |
+| **Mean accuracy** | **XX.X%** | **XX.X%** | **—** |
 
 ---
 
 ## Final Strategy Selected
 
-**Selected:** Strategy A
+> **Fill in after running evaluation**
 
-**Rationale:** Strategy A (the base production prompt) was used to generate
-the final `output.csv` for all 44 test claims. A formal head-to-head comparison
-against Strategy B was not completed before the submission deadline.
-Strategy B remains available in `code/evaluation/main.py` for post-submission
-analysis.
+**Selected:** Strategy A / Strategy B
+
+**Rationale:** [Insert rationale — e.g. Strategy B improved claim_status accuracy
+by X points primarily by reducing false positives on multi-part conversations.]
 
 ---
 
 ## Operational Analysis
 
-### Model Calls — Final Production Run
+### Model Calls
 
-| Phase | Claims | Gemini Calls | Cache Hits | Notes |
-|---|---|---|---|---|
-| Production (final run) | 44 | 8 | 36 | Resumed from checkpoint |
-| Evaluation (if run) | 20 | up to 40 | depends on cache | 2 strategies × 20 claims |
-| **Total actual API calls** | | **8** | | |
+| Phase | Claims | Calls | Note |
+|---|---|---|---|
+| Evaluation (sample) | 20 | 40 | 2 strategies × 20 claims |
+| Production (test) | 46 | 46 | 1 call per claim |
+| **Total** | — | **~86** | |
 
-The low Gemini call count in the final run reflects the checkpoint/cache system.
-36 of 44 claims were already processed in earlier runs and loaded from local cache.
+### Token Usage (Estimates)
 
-### Token Usage (Estimates per Call)
+Gemini 2.5 Flash token estimates per call:
 
 | Component | Tokens (approx.) |
 |---|---|
 | System prompt | ~600 |
 | User prompt | ~300 |
-| Images (avg 2 per claim × ~500 tokens) | ~1000 |
+| Images (1–3 × ~500) | ~500–1500 |
 | Output JSON | ~400 |
-| **Total per call** | **~2300** |
+| **Total per call** | **~1800–2800** |
 
-Full cold run equivalent (44 claims):
-- Input: ~44 × 1900 = ~83,600 tokens
-- Output: ~44 × 400 = ~17,600 tokens
-
-Actual final run (8 Gemini calls):
-- Input: ~8 × 1900 = ~15,200 tokens
-- Output: ~8 × 400 = ~3,200 tokens
+Full test run (46 calls, avg 2 images):
+- Input: ~46 × 1600 = ~73,600 tokens
+- Output: ~46 × 400 = ~18,400 tokens
 
 ### Image Processing
 
 | Phase | Images (approx.) |
 |---|---|
-| Production test set (full) | ~101 (avg 2.3/claim × 44) |
-| Actually sent to Gemini (final run) | ~18 (8 calls × avg 2.3 images) |
-| Sample evaluation (if run) | ~46 (avg 2.3/claim × 20) |
+| Sample evaluation | ~45 (avg 2.3/claim × 20) |
+| Test production | ~106 (avg 2.3/claim × 46) |
 
 ### Cost Estimate
 
-Gemini 2.5 Flash pricing (June 2026 — verify current pricing):
-- Input: ~$0.075 per 1M tokens
-- Output: ~$0.30 per 1M tokens
+Gemini 2.5 Flash pricing (as of June 2026 — verify current pricing):
+- Input: $0.075 per 1M tokens
+- Output: $0.30 per 1M tokens
 
-| Scenario | Input cost | Output cost | Total |
+| Phase | Input cost | Output cost | Total |
 |---|---|---|---|
-| Full cold run (44 calls) | ~$0.006 | ~$0.005 | ~$0.011 |
-| Final cached run (8 calls) | ~$0.001 | ~$0.001 | ~$0.002 |
-| Sample evaluation (40 calls) | ~$0.006 | ~$0.004 | ~$0.010 |
+| Evaluation (40 calls) | ~$0.006 | ~$0.002 | ~$0.008 |
+| Production (46 calls) | ~$0.006 | ~$0.002 | ~$0.008 |
+| **Total** | | | **~$0.016** |
 
-The cache system reduced final run cost by approximately 82% compared to a
-full cold run.
-
-> Costs are approximate. Image token counts vary by image size and resolution.
+> Costs are approximate. Image tokens may vary significantly by image size.
+> Adjust based on actual token counts from Gemini response metadata.
 
 ### Runtime
 
-| Phase | Calls | Avg latency | Inter-call sleep | Estimated total |
+| Phase | Calls | Avg latency | Sleep | Estimated total |
 |---|---|---|---|---|
-| Full cold run (44 calls) | 44 | ~3s | 1s | ~176s (~3 min) |
-| Final cached run (8 calls) | 8 | ~3s | 1s | ~32s |
-| Sample evaluation (40 calls) | 40 | ~3s | 1s | ~160s (~2.7 min) |
-
-Cache hits add negligible latency (JSON file read < 5ms per claim).
+| Evaluation | 40 | ~3s | 1s/call | ~160s (~2.7 min) |
+| Production | 46 | ~3s | 1s/call | ~184s (~3.1 min) |
 
 ### TPM / RPM Considerations
 
 - Inter-call sleep: 1.0 s (configurable via `INTER_CALL_SLEEP_SECONDS` in `config.py`)
-- Retry: exponential backoff, base 2 s, doubles per attempt, max 3 attempts
+- Retry: exponential backoff starting at 2 s, max 3 attempts
 - Gemini 2.5 Flash free tier: 10 RPM / 250,000 TPM
-- At 1 call/s with ~2300 tokens/call: within TPM limits
-- If 429 errors occur: increase `INTER_CALL_SLEEP_SECONDS` to 6.0 (= 10 RPM)
-- Cache means quota pressure is minimal on repeated or resumed runs
+- At 1 call/s with avg ~2200 tokens: well within TPM limits
+- If 429 errors appear, increase `INTER_CALL_SLEEP_SECONDS` to 6.0 (10 RPM = 1 call/6s)
 
 ### Caching Strategy
 
-- System prompt built once per run, reused across all claims.
-- User history and evidence requirements loaded once, looked up via dict.
-- Per-claim JSON cache keyed by `user_id + image_paths` — stable across runs.
-- Checkpoint written immediately after each successful claim.
-- Corrupt cache files detected at load time; affected claim is re-processed.
-- Separate cache namespaces for production and each evaluation strategy:
-  - `.cache/claims/` — production
-  - `.cache/eval_strategy_a/claims/` — Strategy A evaluation
-  - `.cache/eval_strategy_b/claims/` — Strategy B evaluation
+- System prompt is built once per run and reused across all claims.
+- User history and evidence requirements are loaded once and looked up via dict.
+- Images are loaded per-claim (not cached) — acceptable at this scale.
+- No result caching implemented — each run re-calls Gemini for all claims.
 
 ---
 
 ## Failure Modes Observed
 
-| Failure Mode | Observed | Notes |
-|---|---|---|
-| Gemini quota exceeded mid-run | Yes | Resolved by checkpoint/resume; pipeline continued on next run |
-| JSON parse failure | Not observed in final run | Retry logic handles transient malformed responses |
-| Missing image files | Not observed in final run | image_loader warns and skips gracefully |
-| Corrupt cache file | Not observed in final run | Detected at load; claim re-processed automatically |
-| wrong_object_detected missed | Not measured | Formal evaluation not run before submission |
-| Severity underestimated | Not measured | Depends on Gemini visible_issue accuracy |
-| Multi-part claim extraction error | Not measured | Depends on Gemini conversation parsing |
-| risk_flags incomplete | Not measured | Formal Jaccard evaluation not run before submission |
-| evidence_standard_met false positive | Not measured | Formal evaluation not run before submission |
+> **Fill in after running evaluation**
+
+| Failure Mode | Frequency | Impact | Notes |
+|---|---|---|---|
+| wrong_object_detected missed | X/20 | claim_status error | Gemini sometimes describes wrong object without flagging it |
+| Severity underestimated | X/20 | severity mismatch | Rule engine maps from visible_issue; if Gemini misses issue, severity is wrong |
+| Multi-part claim extraction | X/20 | object_part error | Gemini extracts first mentioned part rather than final confirmed part |
+| risk_flags incomplete | X/20 | Jaccard < 1.0 | History flags not flagged when claim seems clean |
+| evidence_standard_met false positive | X/20 | status error | Gemini marks shows_claimed_part=true on low-clarity images |
 
 ---
 
 ## Final Recommendation
 
-The production system successfully generated `output.csv` for all 44 claims
-with zero final processing failures.
+> **Fill in after running evaluation**
 
-**Strategy A** (base production prompt) was used for the final output.
+Use **Strategy [A/B]** for the production run on `dataset/claims.csv`.
 
-The checkpoint and cache system proved essential during development: the pipeline
-was interrupted multiple times due to API quota limits, and the resume capability
-allowed completion without reprocessing already-successful claims. In the final
-run, 36 of 44 claims were served from cache with 8 Gemini API calls made.
-
-Key strengths of the final system:
-- Deterministic output for the same perception input
-- Prompt injection resistance via explicit detection and flag-only response
-- Graceful handling of multi-image claims with per-image independent assessment
-- Cost-efficient execution through aggressive local caching
-- Zero-reconfiguration resume from any point of interruption
+Key strengths:
+- [Insert observed strengths]
 
 Known limitations:
 - Severity accuracy depends entirely on Gemini's visible_issue classification.
-- Multi-language conversations (Spanish, Hindi) rely on Gemini multilingual capability.
-- Rule engine cannot self-correct a wrong visible_issue from Gemini.
-- Formal accuracy measurement against sample_claims.csv ground truth was not
-  completed before the submission deadline.
+- Multi-language claim conversations (Spanish, Hindi) rely on Gemini's multilingual capability.
+- Rule engine cannot correct a wrong visible_issue from Gemini.
 
-Post-hackathon improvements:
-- Run formal evaluation and fill in Strategy A vs B comparison table.
-- Add few-shot examples per object type to the system prompt.
-- Implement a confidence threshold to escalate ambiguous cases to `not_enough_information`.
-- Migrate from deprecated `google-generativeai` SDK to `google.genai`.
-- Add image hash-based deduplication to avoid re-encoding identical images.
+To improve further (post-hackathon):
+- Add few-shot examples to the system prompt for each object type.
+- Implement a confidence threshold and escalate low-confidence cases to `not_enough_information`.
+- Cache Gemini responses by image hash to avoid reprocessing duplicate images.

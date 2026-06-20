@@ -12,6 +12,7 @@ from pathlib import Path
 
 # ── Repository root ───────────────────────────────────────────────────────────
 
+# Resolved to the repo root regardless of where the script is invoked from.
 REPO_ROOT: Path = Path(__file__).resolve().parent.parent
 
 # ── Dataset paths ─────────────────────────────────────────────────────────────
@@ -35,23 +36,30 @@ OUTPUT_CSV: Path = REPO_ROOT / "output.csv"
 
 GEMINI_MODEL: str = "gemini-2.5-flash"
 
+# Read API key from environment; raise early if missing.
 GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
 
-GEMINI_MAX_OUTPUT_TOKENS: int = 4096
+# Maximum tokens Gemini may return per call.
+GEMINI_MAX_OUTPUT_TOKENS: int = 2048
 
 # ── Rate limiting & retry ─────────────────────────────────────────────────────
 
+# Seconds to sleep between consecutive Gemini calls (basic throttle).
 INTER_CALL_SLEEP_SECONDS: float = 1.0
 
+# Number of retry attempts on transient errors (429, 5xx).
 GEMINI_MAX_RETRIES: int = 3
 
+# Base backoff in seconds; doubles on each retry.
 GEMINI_RETRY_BASE_BACKOFF: float = 2.0
 
 # ── Image encoding ────────────────────────────────────────────────────────────
 
+# MIME type used when sending images inline to Gemini.
 IMAGE_MIME_TYPE: str = "image/jpeg"
 
 # ── Output CSV column order ───────────────────────────────────────────────────
+# Must match the required output schema exactly.
 
 OUTPUT_COLUMNS: list[str] = [
     "user_id",
@@ -69,20 +77,3 @@ OUTPUT_COLUMNS: list[str] = [
     "valid_image",
     "severity",
 ]
-
-# ── Cache & checkpoint ────────────────────────────────────────────────────────
-
-# Set to False to disable caching and always call Gemini.
-ENABLE_CACHE: bool = os.environ.get("ENABLE_CACHE", "true").lower() != "false"
-
-# Directory where per-claim JSON cache files are stored.
-# Resolved relative to repo root; override via CACHE_DIR env var.
-CACHE_DIR: Path = Path(
-    os.environ.get("CACHE_DIR", str(REPO_ROOT / ".cache"))
-)
-
-# Path to the checkpoint JSON file tracking completed claim IDs.
-# Defaults to <CACHE_DIR>/checkpoint.json; override via CHECKPOINT_FILE env var.
-CHECKPOINT_FILE: Path = Path(
-    os.environ.get("CHECKPOINT_FILE", str(CACHE_DIR / "checkpoint.json"))
-)
