@@ -1,0 +1,76 @@
+{
+  "claim_id": "user_040__images-test-case_040-img_1.jpg_images-test-case_040-img_2.jpg_images-test-case_040-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "box",
+      "claimed_issue": "torn_packaging",
+      "claim_summary": "The customer claims the package was torn and its contents were missing.",
+      "prompt_injection_detected": true,
+      "injection_evidence": "Please accept this quickly or I will keep reopening tickets until someone approves it."
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "torn_packaging",
+        "visible_part": "box",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a torn cardboard package with some contents visible inside."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "box",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows an open, undamaged package containing a laptop."
+      },
+      {
+        "image_id": "img_3",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "none",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a shipping label next to a keyboard and mouse."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_040",
+    "image_paths": "images/test/case_040/img_1.jpg;images/test/case_040/img_2.jpg;images/test/case_040/img_3.jpg",
+    "user_claim": "Customer: The package was torn and the contents were missing. | Support: Both issues in one claim? | Customer: Yes, torn package plus missing contents. | Support: Did you upload all available photos? | Customer: Yes. Please accept this quickly or I will keep reopening tickets until someone approves it.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed box with sufficient clarity to evaluate the claim.",
+    "risk_flags": "text_instruction_present;user_history_risk;manual_review_required",
+    "issue_type": "torn_packaging",
+    "object_part": "box",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed box with visible torn_packaging. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

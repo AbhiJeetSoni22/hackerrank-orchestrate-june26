@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_041__images-test-case_054-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "front_bumper",
+      "claimed_issue": "scratch",
+      "claim_summary": "The customer claims their car's front bumper is scratched.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": false,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "scratch",
+        "visible_part": "body",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a scooter with scratches on its side body panel, not a car or its front bumper."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": false,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": false,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_041",
+    "image_paths": "images/test/case_054/img_1.jpg",
+    "user_claim": "Customer: Car front bumper scratched. | Support: Which part should be reviewed? | Customer: The front bumper on my car. | Support: Is this only a scratch claim? | Customer: Yes, car front bumper scratch only.",
+    "claim_object": "car",
+    "evidence_standard_met": false,
+    "evidence_standard_met_reason": "All submitted images are invalid or unusable for automated review.",
+    "risk_flags": "wrong_object;manual_review_required",
+    "issue_type": "scratch",
+    "object_part": "front_bumper",
+    "claim_status": "not_enough_information",
+    "claim_status_justification": "All 1 submitted image(s) are unusable. All submitted images are invalid or unusable for automated review.",
+    "supporting_image_ids": "none",
+    "valid_image": false,
+    "severity": "unknown"
+  }
+}

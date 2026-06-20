@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_022__images-test-case_050-img_1.jpg_images-test-case_050-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "screen",
+      "claimed_issue": "crack",
+      "claim_summary": "The customer is claiming a cracked laptop screen.",
+      "prompt_injection_detected": true,
+      "injection_evidence": "\u7b14\u8bb0\u672c\u5c4f\u5e55\u574f\u4e86"
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a laptop with its screen displaying a game, but no crack is visible on the screen."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": true,
+        "notes": "The image clearly shows a laptop with its screen displaying a game, partially covered by a sticky note with text. No crack is visible on the exposed part of the screen."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_022",
+    "image_paths": "images/test/case_050/img_1.jpg;images/test/case_050/img_2.jpg",
+    "user_claim": "Customer: Wo de laptop screen you crack. | Support: Are you reporting a cracked laptop screen? | Customer: Yes, laptop screen cracked. Qing bang wo check screen. | Support: Is the keyboard or body damaged too? | Customer: No, only screen crack.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed screen with sufficient clarity to evaluate the claim.",
+    "risk_flags": "text_instruction_present",
+    "issue_type": "crack",
+    "object_part": "screen",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (crack) is not visible. Images show 'none' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "none"
+  }
+}

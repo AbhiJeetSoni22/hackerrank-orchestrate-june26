@@ -18,7 +18,7 @@ REPO_ROOT: Path = Path(__file__).resolve().parent.parent
 
 DATASET_DIR: Path = REPO_ROOT / "dataset"
 
-CLAIMS_CSV: Path = DATASET_DIR / "claims_top15.csv"
+CLAIMS_CSV: Path = DATASET_DIR / "claims.csv"
 SAMPLE_CLAIMS_CSV: Path = DATASET_DIR / "sample_claims.csv"
 USER_HISTORY_CSV: Path = DATASET_DIR / "user_history.csv"
 EVIDENCE_REQUIREMENTS_CSV: Path = DATASET_DIR / "evidence_requirements.csv"

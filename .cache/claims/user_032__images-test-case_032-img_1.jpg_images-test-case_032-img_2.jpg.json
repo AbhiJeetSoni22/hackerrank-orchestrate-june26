@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_032__images-test-case_032-img_1.jpg_images-test-case_032-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "contents",
+      "claimed_issue": "missing_part",
+      "claim_summary": "The customer claims that the product inside the package is missing.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "crushed_packaging",
+        "visible_part": "box",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A closed cardboard box is visible, showing some crushing on the top surface. The contents are not visible."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "contents",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "An open package is visible, showing decorative contents (a fabric bag, a jar, and a wooden deer cutout) and packaging filler. No missing items are visually apparent among the visible contents."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_032",
+    "image_paths": "images/test/case_032/img_1.jpg;images/test/case_032/img_2.jpg",
+    "user_claim": "Customer: I received this parcel after waiting for almost a week, and I opened it in a hurry because I needed the product for work. | Support: What issue did you notice? | Customer: The delivery looked normal at first, so I kept the box aside. Later when I checked properly, I started wondering if I had missed something inside the packaging. I checked the table, the wrapping, and the area near the door. | Support: Are you claiming outer package damage? | Customer: Not exactly. The box condition is not my main concern. | Support: What should the reviewer verify? | Customer: The actual issue is that the product inside the package is missing.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed contents with sufficient clarity to evaluate the claim.",
+    "risk_flags": "manual_review_required",
+    "issue_type": "missing_part",
+    "object_part": "contents",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (missing_part) is not visible. Images show 'crushed_packaging' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

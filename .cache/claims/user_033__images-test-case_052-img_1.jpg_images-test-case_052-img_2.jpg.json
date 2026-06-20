@@ -1,0 +1,64 @@
+{
+  "claim_id": "user_033__images-test-case_052-img_1.jpg_images-test-case_052-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "package_corner",
+      "claimed_issue": "crushed",
+      "claim_summary": "The customer claims a cardboard box corner is crushed.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "torn_packaging",
+        "visible_part": "package_side",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image shows a hand opening a torn padded mailer, not a cardboard box."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "crushed_packaging",
+        "visible_part": "package_corner",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a cardboard box with a visible crushed corner."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_2"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_033",
+    "image_paths": "images/test/case_052/img_1.jpg;images/test/case_052/img_2.jpg",
+    "user_claim": "Customer: The cardboard box corner is crushed. | Support: To confirm, cardboard box and not a mailer? | Customer: Correct, cardboard box corner. | Support: Is the product inside part of this claim? | Customer: No, package corner only.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed package_corner with sufficient clarity to evaluate the claim.",
+    "risk_flags": "wrong_object;user_history_risk",
+    "issue_type": "crushed",
+    "object_part": "package_corner",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed package_corner with visible crushed. Supporting images: img_2.",
+    "supporting_image_ids": "img_2",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

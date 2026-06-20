@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_045__images-test-case_053-img_1.jpg_images-test-case_053-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "keyboard",
+      "claimed_issue": "missing_part",
+      "claim_summary": "Customer claims their laptop keyboard has a missing or broken key.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": true,
+        "visible_issue": "missing_part",
+        "visible_part": "keyboard",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image shows an external keyboard with several keys missing, not a laptop's integrated keyboard."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "keyboard",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a laptop, but an external keyboard is placed on top of its integrated keyboard area. The external keyboard shows no visible damage, and the laptop's integrated keyboard is obstructed."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": false,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_045",
+    "image_paths": "images/test/case_053/img_1.jpg;images/test/case_053/img_2.jpg",
+    "user_claim": "Customer: My laptop keyboard is damaged. | Support: What kind of damage? | Customer: A key is missing or broken. | Support: Is it definitely the laptop keyboard? | Customer: Yes, laptop keyboard damage.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed keyboard with sufficient clarity to evaluate the claim.",
+    "risk_flags": "wrong_object;user_history_risk",
+    "issue_type": "missing_part",
+    "object_part": "keyboard",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed part (keyboard) is not confirmed by images. Visible part is 'keyboard'. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

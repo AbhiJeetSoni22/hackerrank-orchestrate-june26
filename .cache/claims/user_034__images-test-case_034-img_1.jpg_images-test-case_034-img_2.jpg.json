@@ -1,0 +1,78 @@
+{
+  "claim_id": "user_034__images-test-case_034-img_1.jpg_images-test-case_034-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "label",
+      "claimed_issue": "unknown",
+      "claim_summary": "The customer claims the package's shipping label is damaged and unreadable.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "torn_packaging",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a package with a shipping label that appears torn."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "torn_packaging",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image provides a closer view of the package label, showing a tear."
+      },
+      {
+        "image_id": "img_3",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "torn_packaging",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the package and its label from a different angle, with visible tearing."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1",
+        "img_2",
+        "img_3"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_034",
+    "image_paths": "images/test/case_034/img_1.jpg;images/test/case_034/img_2.jpg",
+    "user_claim": "Customer: The shipping label got damaged. | Support: What part of the package should be reviewed? | Customer: The label, not the box corner or contents. | Support: Is the label unreadable? | Customer: Yes, label damaged and unreadable.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed label with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk",
+    "issue_type": "torn_packaging",
+    "object_part": "label",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed label with visible unknown. Supporting images: img_1;img_2;img_3.",
+    "supporting_image_ids": "img_1;img_2;img_3",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

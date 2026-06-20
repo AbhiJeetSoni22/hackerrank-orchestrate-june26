@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_030__images-test-case_030-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "seal",
+      "claimed_issue": "torn_packaging",
+      "claim_summary": "The customer claims the package seal was torn open.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "seal",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows the package and its top seal, which appears creased but not torn open."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_030",
+    "image_paths": "images/test/case_030/img_1.jpg",
+    "user_claim": "Customer: Package seal side se open jaisa lag raha tha. | Agent: Torn-open package claim? | Customer: Haan, mujhe lag raha hai package torn open tha. | Agent: Missing item bhi hai? | Customer: Nahi, sirf package torn-open review.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed seal with sufficient clarity to evaluate the claim.",
+    "risk_flags": "none",
+    "issue_type": "torn_packaging",
+    "object_part": "seal",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (torn_packaging) is not visible. Images show 'none' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "none"
+  }
+}

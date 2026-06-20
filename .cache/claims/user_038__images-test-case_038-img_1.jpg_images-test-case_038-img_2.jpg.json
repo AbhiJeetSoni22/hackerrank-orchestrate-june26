@@ -1,0 +1,64 @@
+{
+  "claim_id": "user_038__images-test-case_038-img_1.jpg_images-test-case_038-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "contents",
+      "claimed_issue": "broken_part",
+      "claim_summary": "The customer claims an item inside the package is broken.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [
+          "low_light_or_glare"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": false,
+        "visible_issue": "crushed_packaging",
+        "visible_part": "box",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the exterior of a package with visible crushing and damage to the box."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "contents",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows the opened package with various items inside, none of which appear to be broken."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_038",
+    "image_paths": "images/test/case_038/img_1.jpg;images/test/case_038/img_2.jpg",
+    "user_claim": "Customer: The item inside is broken. | Support: Is the outer box damaged as well? | Customer: The box looked bad, but my main claim is the item inside. | Support: Should the reviewer check item condition? | Customer: Yes, inside item broken.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed contents with sufficient clarity to evaluate the claim.",
+    "risk_flags": "low_light_or_glare",
+    "issue_type": "broken_part",
+    "object_part": "contents",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (broken_part) is not visible. Images show 'crushed_packaging' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

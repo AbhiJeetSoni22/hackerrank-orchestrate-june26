@@ -1,0 +1,50 @@
+{
+  "claim_id": "user_043__images-test-case_043-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "body",
+      "claimed_issue": "unknown",
+      "claim_summary": "The user is claiming damage to their car's body panel.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "broken_part",
+        "visible_part": "body",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a red toy car with visible damage, including a broken front section and scratches on its body. It is not a real car."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": false,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": false,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_043",
+    "image_paths": "images/test/case_043/img_1.jpg",
+    "user_claim": "Customer: Car body damage claim. | Support: What kind of vehicle is this for? | Customer: My car body panel. | Support: Which part should be reviewed? | Customer: The damaged car body shown in the image.",
+    "claim_object": "car",
+    "evidence_standard_met": false,
+    "evidence_standard_met_reason": "No image shows the claimed body; the claimed part cannot be assessed.",
+    "risk_flags": "wrong_object;user_history_risk",
+    "issue_type": "broken_part",
+    "object_part": "body",
+    "claim_status": "not_enough_information",
+    "claim_status_justification": "Image evidence is insufficient to evaluate the claim. No image shows the claimed body; the claimed part cannot be assessed.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "unknown"
+  }
+}

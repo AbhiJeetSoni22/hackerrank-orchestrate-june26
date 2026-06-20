@@ -1,0 +1,64 @@
+{
+  "claim_id": "user_045__images-test-case_056-img_1.jpg_images-test-case_056-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "corner",
+      "claimed_issue": "dent",
+      "claim_summary": "The customer claims a laptop corner is dented.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "body",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A laptop is visible from the rear, showing the body and lid, but no damage is apparent on the corner."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "dent",
+        "visible_part": "corner",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A close-up of a laptop corner clearly shows a dent on the surface."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_2"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_045",
+    "image_paths": "images/test/case_056/img_1.jpg;images/test/case_056/img_2.jpg",
+    "user_claim": "Customer: My laptop slipped while I was packing my bag. | Support: What part should we review? | Customer: One corner of the laptop is dented now. | Support: Is this about the body, screen, or keyboard? | Customer: Body only, specifically the laptop corner dent.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed corner with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk",
+    "issue_type": "dent",
+    "object_part": "corner",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed corner with visible dent. Supporting images: img_2.",
+    "supporting_image_ids": "img_2",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

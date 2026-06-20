@@ -1,0 +1,62 @@
+{
+  "claim_id": "user_045__images-test-case_045-img_1.jpg_images-test-case_045-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "lid",
+      "claimed_issue": "crack",
+      "claim_summary": "The customer claims the laptop lid is cracked.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "glass_shatter",
+        "visible_part": "screen",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "The image shows a tablet with a shattered screen, held by two hands."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "lid",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a person closing a silver laptop, with no visible damage to the lid."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_045",
+    "image_paths": "images/test/case_045/img_1.jpg;images/test/case_045/img_2.jpg",
+    "user_claim": "Customer: The laptop lid is cracked. | Agent: Outer lid or display? | Customer: Lid area. | Agent: Is the screen also part of the claim? | Customer: No, this is my laptop lid claim.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed lid with sufficient clarity to evaluate the claim.",
+    "risk_flags": "wrong_object;user_history_risk",
+    "issue_type": "crack",
+    "object_part": "lid",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (crack) is not visible. Images show 'glass_shatter' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

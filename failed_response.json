@@ -1,9 +1,9 @@
 {
   "extracted_claim": {
-    "object_type": "car",
-    "claimed_part": "door",
-    "claimed_issue": "dent",
-    "claim_summary": "The customer claims the car door is dented and the rear bumper is damaged.",
+    "object_type": "package",
+    "claimed_part": "label",
+    "claimed_issue": "unknown",
+    "claim_summary": "The customer claims the package's shipping label is damaged and unreadable.",
     "prompt_injection_detected": false,
     "injection_evidence": null
   },
@@ -14,4 +14,4 @@
       "quality_flags": [],
       "shows_claimed_object": true,
       "shows_claimed_part": true,
-      "visible_issue":
+      "visible_issue": "

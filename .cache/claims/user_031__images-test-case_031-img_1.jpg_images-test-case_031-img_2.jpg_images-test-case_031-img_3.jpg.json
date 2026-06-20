@@ -1,0 +1,78 @@
+{
+  "claim_id": "user_031__images-test-case_031-img_1.jpg_images-test-case_031-img_2.jpg_images-test-case_031-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "label",
+      "claimed_issue": "water_damage",
+      "claim_summary": "The customer claims the package and its label sustained water damage, rendering the label unreadable.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "water_damage",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Close-up of a wet cardboard package with water droplets on the box surface and the shipping label. The label is readable."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "water_damage",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Extreme close-up of the shipping label with water droplets. The label text is clearly readable."
+      },
+      {
+        "image_id": "img_3",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "water_damage",
+        "visible_part": "label",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A person holding a wet package in the rain. The package box and label show water droplets. The label is readable."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1",
+        "img_2",
+        "img_3"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_031",
+    "image_paths": "images/test/case_031/img_1.jpg;images/test/case_031/img_2.jpg;images/test/case_031/img_3.jpg",
+    "user_claim": "Customer: Delivery box got wet. | Support: Is the label affected too? | Customer: Yes, the label became unreadable because of the water. | Support: Are you claiming contents damage? | Customer: No, wet box and unreadable label.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed label with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk",
+    "issue_type": "water_damage",
+    "object_part": "label",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed label with visible water_damage. Supporting images: img_1;img_2;img_3.",
+    "supporting_image_ids": "img_1;img_2;img_3",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

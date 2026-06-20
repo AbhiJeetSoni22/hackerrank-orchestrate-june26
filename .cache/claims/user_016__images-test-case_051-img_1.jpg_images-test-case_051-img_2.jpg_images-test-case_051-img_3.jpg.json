@@ -1,0 +1,74 @@
+{
+  "claim_id": "user_016__images-test-case_051-img_1.jpg_images-test-case_051-img_2.jpg_images-test-case_051-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "door",
+      "claimed_issue": "dent",
+      "claim_summary": "The customer claims their black car door is dented.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "door",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Image shows the side of a black car with no visible damage to the door."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": true,
+        "visible_issue": "dent",
+        "visible_part": "door",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "Image shows a severely dented and scratched door on a silver/grey car, not a black car."
+      },
+      {
+        "image_id": "img_3",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "door",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "Image shows a close-up of a car door handle on a dark car, with no visible damage to the door."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_016",
+    "image_paths": "images/test/case_051/img_1.jpg;images/test/case_051/img_2.jpg;images/test/case_051/img_3.jpg",
+    "user_claim": "Customer: My black car door is dented. | Support: Is the damaged door on the black car? | Customer: Yes, black car door. | Support: Are other vehicle photos only context? | Customer: I uploaded what I had, but the claim is for my black car door.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed door with sufficient clarity to evaluate the claim.",
+    "risk_flags": "wrong_object;user_history_risk;manual_review_required",
+    "issue_type": "dent",
+    "object_part": "door",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed door with visible dent. Supporting images: none.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

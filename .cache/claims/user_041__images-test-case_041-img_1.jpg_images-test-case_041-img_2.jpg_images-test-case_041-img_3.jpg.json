@@ -1,0 +1,79 @@
+{
+  "claim_id": "user_041__images-test-case_041-img_1.jpg_images-test-case_041-img_2.jpg_images-test-case_041-img_3.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "car",
+      "claimed_part": "front_bumper",
+      "claimed_issue": "unknown",
+      "claim_summary": "The customer claims their blue car's front bumper is damaged.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [
+          "low_light_or_glare"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "front_bumper",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A blue car's front bumper is visible, but the image is dark due to low light. No damage is discernible on the bumper."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [
+          "blurry_image",
+          "cropped_or_obstructed"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "none",
+        "visible_part": "fender",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "A blue car's fender and a small portion of the front bumper are visible. The image is blurry and cropped. No damage is discernible."
+      },
+      {
+        "image_id": "img_3",
+        "valid": false,
+        "quality_flags": [],
+        "shows_claimed_object": false,
+        "shows_claimed_part": false,
+        "visible_issue": "broken_part",
+        "visible_part": "front_bumper",
+        "wrong_object_detected": true,
+        "text_instruction_present": false,
+        "notes": "This image shows a red car with a severely damaged front bumper and missing headlight, which is not the claimed blue car."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": false,
+      "issue_matches_claim": false,
+      "part_matches_claim": true,
+      "supporting_image_ids": []
+    }
+  },
+  "result": {
+    "user_id": "user_041",
+    "image_paths": "images/test/case_041/img_1.jpg;images/test/case_041/img_2.jpg;images/test/case_041/img_3.jpg",
+    "user_claim": "Customer: My blue car front bumper is damaged. | Support: Is the color important for matching the vehicle? | Customer: Yes, it is my blue car. | Support: Any other vehicle involved? | Customer: No, review the blue car front bumper.",
+    "claim_object": "car",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed front_bumper with sufficient clarity to evaluate the claim.",
+    "risk_flags": "blurry_image;cropped_or_obstructed;low_light_or_glare;wrong_object;manual_review_required",
+    "issue_type": "broken_part",
+    "object_part": "front_bumper",
+    "claim_status": "contradicted",
+    "claim_status_justification": "The claimed issue (unknown) is not visible. Images show 'broken_part' instead. Claim is contradicted by visual evidence.",
+    "supporting_image_ids": "none",
+    "valid_image": true,
+    "severity": "low"
+  }
+}

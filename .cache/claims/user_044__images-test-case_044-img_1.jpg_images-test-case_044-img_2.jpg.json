@@ -1,0 +1,65 @@
+{
+  "claim_id": "user_044__images-test-case_044-img_1.jpg_images-test-case_044-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "screen",
+      "claimed_issue": "glass_shatter",
+      "claim_summary": "The customer claims their laptop screen is broken.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "glass_shatter",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a laptop with a shattered screen, but it appears to be a screenshot from a video or a stock image."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "glass_shatter",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a laptop with a shattered screen, but it is clearly a stock photo from iStock."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1",
+        "img_2"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_044",
+    "image_paths": "images/test/case_044/img_1.jpg;images/test/case_044/img_2.jpg",
+    "user_claim": "Customer: Laptop screen is broken. | Support: Is this an original photo of your own laptop? | Customer: It shows the broken laptop screen issue. | Support: Are you claiming only screen damage? | Customer: Yes, screen broken.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed screen with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk;manual_review_required",
+    "issue_type": "glass_shatter",
+    "object_part": "screen",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed screen with visible glass_shatter. Supporting images: img_1;img_2.",
+    "supporting_image_ids": "img_1;img_2",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

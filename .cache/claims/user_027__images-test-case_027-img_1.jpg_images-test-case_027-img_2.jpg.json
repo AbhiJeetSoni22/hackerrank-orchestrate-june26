@@ -1,0 +1,69 @@
+{
+  "claim_id": "user_027__images-test-case_027-img_1.jpg_images-test-case_027-img_2.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "screen",
+      "claimed_issue": "water_damage",
+      "claim_summary": "The customer is claiming water damage (liquid stain) on the laptop screen.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [
+          "low_light_or_glare"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "water_damage",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a laptop screen with extensive splotchy patterns consistent with water damage or a stain."
+      },
+      {
+        "image_id": "img_2",
+        "valid": true,
+        "quality_flags": [
+          "blurry_image",
+          "low_light_or_glare"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "stain",
+        "visible_part": "screen",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image shows a laptop screen with faint, widespread discoloration or patterns, but the details are less clear due to blurriness and distance."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_027",
+    "image_paths": "images/test/case_027/img_1.jpg;images/test/case_027/img_2.jpg",
+    "user_claim": "Customer: I am confused if this is a reflection or actual damage, but after rain travel the screen looked stained. | Support: Should we review this as liquid damage? | Customer: Yes, screen liquid stain. | Support: Not keyboard? | Customer: Correct, screen only.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed screen with sufficient clarity to evaluate the claim.",
+    "risk_flags": "blurry_image;low_light_or_glare;user_history_risk",
+    "issue_type": "water_damage",
+    "object_part": "screen",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed screen with visible water_damage. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}

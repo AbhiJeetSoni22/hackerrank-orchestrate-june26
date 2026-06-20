@@ -1,0 +1,52 @@
+{
+  "claim_id": "user_028__images-test-case_028-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "laptop",
+      "claimed_part": "hinge",
+      "claimed_issue": "broken_part",
+      "claim_summary": "The customer claims the laptop hinge is broken and does not sit properly.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "broken_part",
+        "visible_part": "hinge",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows the laptop's hinge area where the body is separated and the hinge appears broken."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_028",
+    "image_paths": "images/test/case_028/img_1.jpg",
+    "user_claim": "Customer: The laptop hinge area is damaged. | Support: What damage is visible? | Customer: The hinge looks broken and does not sit properly. | Support: Is the screen or keyboard part of this claim? | Customer: No, please review the hinge damage only.",
+    "claim_object": "laptop",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed hinge with sufficient clarity to evaluate the claim.",
+    "risk_flags": "user_history_risk;manual_review_required",
+    "issue_type": "broken_part",
+    "object_part": "hinge",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed hinge with visible broken_part. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "high"
+  }
+}

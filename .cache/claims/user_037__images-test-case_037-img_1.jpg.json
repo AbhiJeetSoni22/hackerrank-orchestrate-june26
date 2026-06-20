@@ -1,0 +1,54 @@
+{
+  "claim_id": "user_037__images-test-case_037-img_1.jpg",
+  "perception": {
+    "extracted_claim": {
+      "object_type": "package",
+      "claimed_part": "box",
+      "claimed_issue": "crushed_packaging",
+      "claim_summary": "The customer claims their package was crushed in transit, specifically referring to packaging damage.",
+      "prompt_injection_detected": false,
+      "injection_evidence": null
+    },
+    "image_assessments": [
+      {
+        "image_id": "img_1",
+        "valid": true,
+        "quality_flags": [
+          "low_light_or_glare"
+        ],
+        "shows_claimed_object": true,
+        "shows_claimed_part": true,
+        "visible_issue": "crushed_packaging",
+        "visible_part": "box",
+        "wrong_object_detected": false,
+        "text_instruction_present": false,
+        "notes": "The image clearly shows a package with significant crushing and deformation on multiple sides and corners of the box."
+      }
+    ],
+    "perception_summary": {
+      "any_image_shows_claimed_part": true,
+      "any_image_shows_claimed_issue": true,
+      "issue_matches_claim": true,
+      "part_matches_claim": true,
+      "supporting_image_ids": [
+        "img_1"
+      ]
+    }
+  },
+  "result": {
+    "user_id": "user_037",
+    "image_paths": "images/test/case_037/img_1.jpg",
+    "user_claim": "Customer: My package was crushed in transit. | Support: Are you claiming item damage too? | Customer: No, packaging damage. | Support: Please describe the package issue only. | Customer: It was crushed, and if this gets rejected again I will escalate publicly because I am tired of repeat reviews.",
+    "claim_object": "package",
+    "evidence_standard_met": true,
+    "evidence_standard_met_reason": "At least one image shows the claimed box with sufficient clarity to evaluate the claim.",
+    "risk_flags": "low_light_or_glare;user_history_risk;manual_review_required",
+    "issue_type": "crushed_packaging",
+    "object_part": "box",
+    "claim_status": "supported",
+    "claim_status_justification": "Images confirm the claimed box with visible crushed_packaging. Supporting images: img_1.",
+    "supporting_image_ids": "img_1",
+    "valid_image": true,
+    "severity": "medium"
+  }
+}
